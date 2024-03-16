@@ -3,16 +3,22 @@ import App from './App.vue'
 import Authorization from './components/Authorization.vue';
 import Registration from './components/Registration.vue';
 import { createRouter, createWebHistory } from "vue-router"
+import MainPage from './components/MainPage.vue';
 const routeInfos = [
     {
-    path : "/",
-    name: Authorization,
-    component : Authorization
+        path : "/",
+        name: Authorization,
+        component : Authorization
     },
     {
         path : "/registration",
         name: Registration,
         component : Registration
+    },
+    {
+        path: "/mainpage",
+        name: MainPage,
+        component: MainPage
     }
 ]
 

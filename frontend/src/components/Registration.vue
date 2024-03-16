@@ -8,7 +8,7 @@
       <button type="submit" @click.prevent="onSubmit"  class="mb-3 text-white tbg w-48 pt-1 pb-1 rounded font-sans">Зарегистрироваться</button>
       <a href="/" class="mb-7 font-sans text-slate-500/60">Войти</a>
     </form>
-  </template>
+</template>
 
 <script>
 export default{
