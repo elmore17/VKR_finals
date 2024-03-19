@@ -61,4 +61,9 @@ input::-webkit-input-placeholder {
 input::-moz-placeholder {
 color: #ccc;
 }
+
+.containercolorinfo{
+  color: #71717A;
+  background-color: #0F0F0F;
+}
 </style>
