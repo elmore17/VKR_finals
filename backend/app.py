@@ -14,6 +14,29 @@ CORS(app)
 def get_db_connection():
     return psycopg2.connect(database="kisprod", user="postgres", password="", host="localhost", port="5432")
 
+
+@app.route('/refreshToken', methods=['POST'])
+def refresh_token():
+    # Получение рефреш токена из запроса
+    refresh_token = None
+    if 'x-refresh-token' in request.headers:
+        refresh_token = request.headers['x-refresh-token']
+    if not refresh_token:
+        return jsonify({'message': 'Refresh token is missing!'}), 401
+
+    try:
+        # Проверка рефреш токена
+        data = jwt.decode(refresh_token, app.config['SECRET_KEY'])
+        # Создание нового токена доступа
+        new_token = jwt.encode({
+            'public_id': data['public_id'],
+            'exp': datetime.utcnow() + timedelta(minutes=30)
+        }, app.config['SECRET_KEY'])
+
+        return jsonify({'token': new_token.decode('utf-8')}), 201
+    except:
+        return jsonify({'message': 'Refresh token is invalid!'}), 401
+
 # decorator for verifying the JWT
 def token_required(f):
     @wraps(f)
@@ -92,7 +115,11 @@ def login_post():
                         'public_id': user_id[0],
                         'exp' : datetime.utcnow() + timedelta(minutes = 30)
                     }, app.config['SECRET_KEY'])
-                    return make_response(jsonify({'token' : token.decode('utf-8')}), 201)
+                    refresh_token = jwt.encode({
+                        'public_id': user_id[0],
+                        'exp': datetime.utcnow() + timedelta(days=30)  # длинный срок действия
+                    }, app.config['SECRET_KEY'])
+                    return make_response(jsonify({'token' : token.decode('utf-8'), 'refresh_token': refresh_token.decode('utf-8')}), 201)
                 else:
                     return make_response(
                         'Could not verify',

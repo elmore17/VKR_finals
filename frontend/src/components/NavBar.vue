@@ -5,9 +5,7 @@ import { initFlowbite } from 'flowbite'
 // initialize components based on data attribute selectors
 onMounted(() => {
     initFlowbite();
-})
-
-
+});
 </script>
 
 <template>
@@ -32,7 +30,7 @@ onMounted(() => {
             <div id="dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
                 <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
                 <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Dashboard</a>
+                    <a data-modal-target="AddCommissionPeople" data-modal-toggle="AddCommissionPeople" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Добавление челенов комиссии</a>
                 </li>
                 <li>
                     <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Settings</a>
@@ -45,7 +43,7 @@ onMounted(() => {
         </div>
         <div>
             <button id="dropdownAvatarNameButton" data-dropdown-toggle="dropdownAvatarName" class="flex items-center text-sm pe-1 font-medium text-white mb-4" type="button">
-            root
+            {{ UserData }}
             <svg class="w-2.5 h-2.5 ms-3 cursordrop" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
             </svg>
@@ -62,12 +60,112 @@ onMounted(() => {
                 </li>
                 </ul>
                 <div class="py-2">
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Выход</a>
+                <a  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white" @click.prevent="logOut">Выход</a>
                 </div>
             </div>
         </div>
     </nav>
+
+    <!-- Main modal -->
+    <div id="AddCommissionPeople" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-full max-w-2xl max-h-full">
+            <!-- Modal content -->
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <!-- Modal header -->
+                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                        Добавление членов комиссии
+                    </h3>
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="AddCommissionPeople">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                        </svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+                <!-- Modal body -->
+                    <div class="p-4 md:p-5 space-y-4">
+                        <button>Добавить</button>
+                        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">
+                                        ФИО
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                        Должность
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                        Редактирование
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                        Apple MacBook Pro 17"
+                                    </th>
+                                    <td class="px-6 py-4">
+                                        Silver
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <a href="#" class="font-medium text-black hover:underline">Редактировать</a>
+                                    </td>
+                                </tr>  
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
+
+<script>
+import UserService from '../services/user.service';
+import EventBus from "../common/EventBus";
+
+export default{
+    data(){
+        return{
+            UserData: "",
+        };
+    },
+    computed: {
+        currentUser() {
+            return this.$store.state.auth.user;
+        }
+    },
+    mounted() {
+        if (!this.currentUser) {
+            this.$router.push('/');
+        }
+        UserService.getUserBoard().then(
+        (response) => {
+            this.UserData = response.data.users;
+            this.UserData = this.UserData.map(user => user.name).join(', ');
+        },
+        (error) => {
+            if (error.response && error.response.status === 403) {
+                EventBus.dispatch("logout");
+            }
+        });
+        EventBus.on("logout", () => {
+            this.logOut();
+        });
+    },
+    methods: {
+        logOut() {
+            this.$store.dispatch('auth/logout');
+            this.$router.push('/');
+        }
+    },
+    beforeDestroy() {
+        EventBus.remove("logout");
+    }
+};
+</script>
 
 <style>
 .textnavbutton{

@@ -1,17 +1,16 @@
-import axios from 'axios';
-
-const API_URL = 'http://127.0.0.1:83';
+import api from "./api";
+import TokenService from "./token.service";
 
 class AuthService {
-  login(user) {
-    return axios
-      .post(API_URL + '/login', {
-        login: user.login,
-        password: user.password
+  login({ login, password }) {
+    return api
+      .post('/login', {
+        login,
+        password
       })
       .then(response => {
         if (response.data.token) {
-          localStorage.setItem('user', JSON.stringify(response.data));
+          TokenService.setUser(response.data);
         }
 
         return response.data;
@@ -19,7 +18,7 @@ class AuthService {
   }
 
   logout() {
-    localStorage.removeItem('user');
+    TokenService.removeUser();
   }
 
 //   register(user) {

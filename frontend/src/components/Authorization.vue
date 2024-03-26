@@ -25,7 +25,7 @@ export default{
   },
   created(){
     if(this.loggedIn){
-      return this.$router.push('/registration');
+      return this.$router.push('/mainpage');
     }
   },
   methods:{
@@ -36,7 +36,7 @@ export default{
       }
       this.$store.dispatch("auth/login", formData).then(
         () => {
-          this.$router.push("/registration");
+          this.$router.push("/mainpage");
         }
       );
     }
