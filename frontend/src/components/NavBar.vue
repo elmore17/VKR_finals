@@ -30,7 +30,7 @@ onMounted(() => {
             <div id="dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
                 <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
                 <li>
-                    <a data-modal-target="AddCommissionPeople" data-modal-toggle="AddCommissionPeople" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Добавление челенов комиссии</a>
+                    <a data-modal-target="AddCommissionPeople" data-modal-toggle="AddCommissionPeople" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer">Добавление челенов комиссии</a>
                 </li>
                 <li>
                     <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Settings</a>
@@ -43,7 +43,7 @@ onMounted(() => {
         </div>
         <div>
             <button id="dropdownAvatarNameButton" data-dropdown-toggle="dropdownAvatarName" class="flex items-center text-sm pe-1 font-medium text-white mb-4" type="button">
-            {{ UserData }}
+            {{ UserLogin }}
             <svg class="w-2.5 h-2.5 ms-3 cursordrop" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
             </svg>
@@ -52,7 +52,7 @@ onMounted(() => {
             <!-- Dropdown menu profile-->
             <div id="dropdownAvatarName" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
                 <div class="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                <div class="font-medium ">Pro User</div>
+                <div class="font-medium ">{{ UserName }}</div>
                 </div>
                 <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownInformdropdownAvatarNameButtonationButton">
                 <li>
@@ -60,7 +60,7 @@ onMounted(() => {
                 </li>
                 </ul>
                 <div class="py-2">
-                <a  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white" @click.prevent="logOut">Выход</a>
+                <a  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer" @click.prevent="logOut">Выход</a>
                 </div>
             </div>
         </div>
@@ -102,12 +102,12 @@ onMounted(() => {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                                <tr v-for="item in UsersCommission" :key="item.id" class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
                                     <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        Apple MacBook Pro 17"
+                                        {{item.user_name}}
                                     </th>
                                     <td class="px-6 py-4">
-                                        Silver
+                                        {{item.post}}
                                     </td>
                                     <td class="px-6 py-4">
                                         <a href="#" class="font-medium text-black hover:underline">Редактировать</a>
@@ -129,7 +129,9 @@ import EventBus from "../common/EventBus";
 export default{
     data(){
         return{
-            UserData: "",
+            UserLogin: '',
+            UserName: '',
+            UsersCommission: []
         };
     },
     computed: {
@@ -143,14 +145,22 @@ export default{
         }
         UserService.getUserBoard().then(
         (response) => {
-            this.UserData = response.data.users;
-            this.UserData = this.UserData.map(user => user.name).join(', ');
+            this.UserLogin = response.data.users;
+            this.UserLogin = this.UserLogin.map(user => user.login).join(', ');
+
+            this.UserName = response.data.users;
+            this.UserName = this.UserName.map(user => user.name).join(', ');
         },
         (error) => {
             if (error.response && error.response.status === 403) {
                 EventBus.dispatch("logout");
             }
         });
+        UserService.getUserCommission().then(
+            (response) => {
+                this.UsersCommission = response.data.users_commission;
+            }
+        )
         EventBus.on("logout", () => {
             this.logOut();
         });

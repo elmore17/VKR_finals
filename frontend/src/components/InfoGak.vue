@@ -87,7 +87,7 @@
             <div class="h-44">
             <p class="text-white font-medium text-lg pb-2 text-start">Добавленные протоколы</p>
             <div class="flex flex-row">
-                <div class="flex flex-row mr-auto">
+                <div class="flex flex-row mr-auto cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" style="color: #71717A;"  stroke="currentColor" class="w-6 h-6 mr-1">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                     </svg>
@@ -110,7 +110,7 @@
                 </div>
             </div>
             <div class="overflow-auto border rounded-b-xl colorboxbottom max-h-60">
-                <div class=" h-11 pl-5 pt-2 hover:bg-white rounded-b-xl">
+                <div class=" h-11 pl-5 pt-2 hover:bg-white rounded-b-xl cursor-pointer">
                     <p class="cursordrop text-lg">ФИО</p>
                 </div>
             </div>
@@ -146,13 +146,13 @@
                                 <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Нажмите чтобы загрузить</span> или перетащите файл</p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">DOCX</p>
                             </div>
-                            <input id="dropzone-file" type="file" class="hidden" />
+                            <input @change="fileprotocol" id="dropzone-file" type="file" class="hidden" />
                         </label>
                     </div> 
                 </div>
                 <!-- Modal footer -->
                 <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-                    <button  class="py-2.5 px-5 ms-3 text-sm font-medium tbg rounded-lg">
+                    <button  class="py-2.5 px-5 ms-3 text-sm font-medium tbg rounded-lg" @click="ImportProtocol()">
                     Добавить протокол
                     </button>
                     <button data-modal-hide="AddFileStudents" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Отмена</button>
@@ -220,3 +220,23 @@
         </div>
     </div>
 </template>
+
+<script>
+export default{
+    data() {
+        return {
+            selectFile: null
+        }
+    },
+    methods:{
+        fileprotocol(event){
+            const file = event.target.files[0];
+            this.selectFile = file;
+        },
+        ImportProtocol(){
+            console.log("filePath")
+        },
+    }
+}
+
+</script>

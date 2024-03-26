@@ -21,13 +21,16 @@ class AuthService {
     TokenService.removeUser();
   }
 
-//   register(user) {
-//     return axios.post(API_URL + 'signup', {
-//       username: user.username,
-//       email: user.email,
-//       password: user.password
-//     });
-//   }
+  register({login, name, password1, password2}) {
+    return api.post('/registration',{
+      login,
+      name,
+      password1,
+      password2})
+      .then(response =>{
+        return response.data;
+      });
+  }
 }
 
 export default new AuthService();

@@ -14,5 +14,38 @@
 <script>
 export default{
     name: 'Registration',
+    data(){
+      return{
+        login: '',
+        name: '',
+        password1: '',
+        password2: ''
+      }
+    },
+    computed:{
+      loggedIn(){
+        return this.$store.state.auth.status.loggedIn;
+      },
+    },
+    mounted() {
+      if (this.loggedIn) {
+        this.$router.push("/");
+      }
+    },
+    methods:{
+      onSubmit(){
+        let formData = {
+          login: this.login,
+          name: this.name,
+          password1: this.password1,
+          password2: this.password2
+        }
+        this.$store.dispatch("auth/register", formData).then(
+          () => {
+            this.$router.push("/");
+          }
+        );
+      }
+    }
 }
 </script>

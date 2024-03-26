@@ -34,9 +34,7 @@ const setup = (store) => {
                 'x-refresh-token': TokenService.getLocalRefreshToken(),
               },
             });
-
-            const accessToken = rs.data;
-
+            const accessToken = rs.data.token;
             store.dispatch('/refreshToken', accessToken);
             TokenService.updateLocalAccessToken(accessToken);
 
