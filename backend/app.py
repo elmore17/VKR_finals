@@ -5,6 +5,8 @@ from flask_cors import CORS
 import jwt
 from functools import wraps
 from datetime import datetime, timedelta
+from pathlib import Path
+from docxcreate import read_docx
 # instantiate the app
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -183,5 +185,75 @@ def get_users_commission():
             }
             user_list.append(user_dict)
         return make_response(jsonify({'users_commission': user_list}))
+    
+@app.route('/uploadfile', methods=['POST'])
+def upload_file():
+    try:
+        #Загрузка файла и сохранение в директорию Downloads
+        uploaded_file = request.files['file']
+        downloads_directory = Path.home() / 'Downloads'
+        file_path = downloads_directory / uploaded_file.filename
+        uploaded_file.save(file_path)
+        # output_json = 'output.json'
+        data_text = read_docx(file_path)
+        # create_json(data_text, output_json)
+
+        #Добавление информиции из docx в базу данных
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT id_filepath FROM filepath WHERE filename = %s", (uploaded_file.filename,))
+            existing_filepath = cursor.fetchone()
+            if existing_filepath is None:
+                cursor.execute("INSERT INTO filepath (filename) VALUES (%s)", (uploaded_file.filename,))
+                conn.commit()
+            for item in data_text:
+                # Проверка наличия направления в таблице direction
+                cursor.execute("SELECT id FROM direction WHERE name_direction = %s", (item[2],))
+                existing_direction = cursor.fetchone()
+                if existing_direction is None:
+                    cursor.execute("INSERT INTO direction (name_direction) VALUES (%s)", (item[2],))
+                    conn.commit()
+
+                #Проверка наличия научного руководителя в БД
+                cursor.execute("SELECT id FROM scientific_adviser WHERE name_adviser = %s AND role = %s", (item[37], item[41]))
+                existing_scientific_adviser = cursor.fetchone()
+                if existing_scientific_adviser is None:
+                    cursor.execute("INSERT INTO scientific_adviser (name_adviser, role) VALUES (%s, %s)", (item[37], item[41]))
+                    conn.commit()
+
+                #Проверка наличия студента в БД
+                cursor.execute("SELECT id FROM students WHERE name = %s AND title_gradual_work = %s", (item[26], item[29]))
+                existing_student = cursor.fetchone()
+                if existing_student is None:
+                    cursor.execute("INSERT INTO students (name, title_gradual_work, id_scientific_adviser) VALUES (%s, %s, %s)", (item[26], item[29], existing_scientific_adviser))
+                    conn.commit()
+                
+                #Проверка наличия квалификации в БД
+                cursor.execute("SELECT id FROM level_education WHERE name_level_education = %s", (item[121], ))
+                existing_level_education = cursor.fetchone()
+                if existing_level_education is None:
+                    cursor.execute("INSERT INTO level_education (name_level_education) VALUES (%s)", (item[121],))
+                    conn.commit()
+
+                #Проверка наличия специальностей в БД
+                cursor.execute("SELECT id FROM speciality WHERE name_speciality = %s", (item[126],))
+                existing_speciality = cursor.fetchone()
+                if existing_speciality is None:
+                    cursor.execute("INSERT INTO speciality (name_speciality) VALUES (%s)", (item[126], ))
+                    conn.commit()
+
+                #Таблица для шаблонизации
+                cursor.execute("SELECT id FROM graduate_work WHERE id_student = %s", (existing_student,))
+                existing_graduate_work = cursor.fetchone()
+                if existing_graduate_work is None:
+                    cursor.execute("INSERT INTO graduate_work (id_student, id_direction, id_scientific_adviser, id_level_education, id_speciality, id_filepath) VALUES (%s, %s, %s, %s, %s, %s)", (existing_student, existing_direction, existing_scientific_adviser, existing_level_education, existing_speciality, existing_filepath))
+                    conn.commit()
+        return make_response(jsonify({'status': 'success', 'message': 'File uploaded successfully', 'filePath': str(file_path)}))
+    except Exception as e:
+        return make_response(
+                        'Could not file',
+                        502,
+                        {'WWW-Authenticate' : 'File !!!!"'}
+                    )
             
 app.run(host='0.0.0.0', port=83)

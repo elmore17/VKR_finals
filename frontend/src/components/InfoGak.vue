@@ -222,6 +222,7 @@
 </template>
 
 <script>
+import { Modal } from 'flowbite';
 export default{
     data() {
         return {
@@ -234,7 +235,20 @@ export default{
             this.selectFile = file;
         },
         ImportProtocol(){
-            console.log("filePath")
+            let formData = { 
+                file: this.selectFile
+            }
+            this.$store.dispatch("file/uploadfile", formData)
+                .then(
+                response => {
+                    if(response.status == "success"){
+                        const $targetEl = document.getElementById("AddFileStudents");
+                        const modal = new Modal($targetEl);
+                        modal.hide();
+                    }
+                    console.log(response)
+                }
+            );
         },
     }
 }

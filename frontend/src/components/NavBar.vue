@@ -160,7 +160,7 @@ export default{
             (response) => {
                 this.UsersCommission = response.data.users_commission;
             }
-        )
+        );
         EventBus.on("logout", () => {
             this.logOut();
         });
