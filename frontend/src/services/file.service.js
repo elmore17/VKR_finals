@@ -15,6 +15,15 @@ class FileServices{
             return response.data;
         });
     }
+    getfilelist(){
+        return api.get('/uploadfile');
+    }
+    getinfofromfile({ id }){
+        return api.get('/getinfofromfile?id=' + id)
+        .then(response => {
+            return response.data;
+        })
+    }
 }
 
 export default new FileServices();

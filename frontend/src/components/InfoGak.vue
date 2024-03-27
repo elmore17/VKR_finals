@@ -23,27 +23,25 @@
                                     <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
                                 </svg>
                             </div>
-                            <input datepicker datepicker-buttons datepicker-autoselect-today datepicker-format="dd/mm/yyyy" type="text" class="bg-none border-dashed containercolorinfo text-sm rounded-3xl block w-44 h-7 ps-10 p-2.5 border-collapse" placeholder="Выберете дату">
+                            <input v-model="selectedDate"  id="datepicker" datepicker datepicker-buttons datepicker-autohide datepicker-autoselect-today datepicker-format="dd/mm/yyyy" type="text" class="bg-none border-dashed containercolorinfo text-sm rounded-3xl block w-44 h-7 ps-10 p-2.5 border-collapse" placeholder="Выберете дату">
                         </div>
                     </div>
                     <div class="border max-w-96 h-11 pl-5 pt-3 rounded-b-xl colorboxbottom">
-                        <p class="cursordrop text-xs">24.05.24</p>
+                        <p class="cursordrop text-xs"></p>
                     </div>
                 </div>
                 <div class="mt-5">
                     <div class="border max-w-96 h-28 pl-5 pt-5 rounded-t-xl colorboxinfo">
                         <p class="text-white font-medium text-lg pb-2">Председатель ГЭК</p>
-                        <div class="relative max-w-sm">
-                        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
-                            </svg>
-                        </div>
-                        <input type="text" class="bg-none border-dashed containercolorinfo text-sm rounded-3xl block w-44 h-7 ps-10 p-2.5 border-collapse" placeholder="ФИО">
+                        <div class="">
+                            <input type="text" list="names" class="bg-none border-dashed containercolorinfo text-sm rounded-3xl block w-44 h-7 ps-3 p-2.5 border-collapse" placeholder="ФИО">
+                            <datalist id="names">
+                                <option v-for="item in UsersCommission" :key="item.id" :value=item.user_name></option>
+                            </datalist>
                         </div>
                     </div>
                     <div class="border max-w-96 h-11 pl-5 pt-3 rounded-b-xl colorboxbottom">
-                        <p class="cursordrop text-xs">ФИО</p>
+                        <p class="cursordrop text-xs"></p>
                     </div>
                 </div>
                 <div class="mt-5 col-span-2">
@@ -58,9 +56,8 @@
                             </button>
                         </div>
                     </div>
-                    <div class="border h-11 pl-5 pt-3 rounded-b-xl colorboxbottom flex flex-row">
-                        <p class="cursordrop text-xs mr-1">ФИО</p>
-                        <p class="cursordrop text-xs mr-1">ФИО</p>
+                    <div class="flex flex-col flex-wrap content-start border h-11 pl-5 pt-3 rounded-b-xl colorboxbottom overflow-x-auto">
+                        <p v-for="item in selectedItems" :key="item.id"  class="cursordrop text-xs mr-1">{{item.user_name}},</p>
                     </div>
                 </div>
                 <div class="mt-5 col-span-2">
@@ -86,12 +83,12 @@
         <div>
             <div class="h-44">
             <p class="text-white font-medium text-lg pb-2 text-start">Добавленные протоколы</p>
-            <div class="flex flex-row">
-                <div class="flex flex-row mr-auto cursor-pointer">
+            <div v-for="item in filelist" :key="item.id"  class="flex flex-row" v-on:click="GetInfoFromFile(item)">
+                <div  class="flex flex-row mr-auto cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" style="color: #71717A;"  stroke="currentColor" class="w-6 h-6 mr-1">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                     </svg>
-                    <p class="text-white">C://fff</p>
+                    <p class="text-white">{{item.file_name}}</p>
                 </div>
                     <p style="color: #71717A;">03.03.24</p>
                 </div>
@@ -99,19 +96,19 @@
             
             <div class="border" style="border-color: #71717A;"></div>
             
-            <div class="mt-8 border rounded-t-xl px-5 py-5 colorboxinfo" style="border-color: #71717A;">
+            <div class="mt-8 border rounded-t-xl px-5 py-4 colorboxinfo" style="border-color: #71717A;">
                 <p class="text-white font-medium text-lg pb-2 text-start">Студенты</p>
                 <div class="flex flex-row justify-between mt-7">
                     <p class="text-white">Заполненных студентов</p>
-                    <p style="color: #71717A;">1/20</p>
+                    <p style="color: #71717A;">0/{{students.length}}</p>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full dark:bg-gray-700 mt-1">
                     <div class="tbg text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" style="width: 45%"> 45%</div>
                 </div>
             </div>
             <div class="overflow-auto border rounded-b-xl colorboxbottom max-h-60">
-                <div class=" h-11 pl-5 pt-2 hover:bg-white rounded-b-xl cursor-pointer">
-                    <p class="cursordrop text-lg">ФИО</p>
+                <div v-for="item in students" :key="item.id" class=" h-11 pl-5 pt-2 hover:bg-white rounded-b-xl cursor-pointer" :class="{ 'bg-white': item === selectedItemDetails }" @click="toggleDetails(item)">
+                    <p class="cursordrop text-lg">{{item.name}}</p>
                 </div>
             </div>
         </div>
@@ -143,8 +140,8 @@
                                 <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
                                 </svg>
-                                <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Нажмите чтобы загрузить</span> или перетащите файл</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">DOCX</p>
+                                <p class="mb-2 text-sm text-gray-500 dark:text-gray-400" id="textprotocol"><span class="font-semibold">Нажмите чтобы загрузить</span> или перетащите файл</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400" id="textformatdata">DOCX</p>
                             </div>
                             <input @change="fileprotocol" id="dropzone-file" type="file" class="hidden" />
                         </label>
@@ -164,10 +161,10 @@
 
     <div id="AddGosCommission" class="z-10 hidden bg-white rounded-lg shadow w-60 dark:bg-gray-700">
         <ul class="h-48 px-3 pb-3 overflow-y-auto text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownSearchButton">
-            <li>
+            <li v-for="item in UsersCommission" :key="item.id" >
                 <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-                <input id="checkbox-item-11" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                <label for="checkbox-item-11" class="w-full ms-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">ФИО</label>
+                    <input :id="`checkbox-item-`+ item.id" type="checkbox" value="" class="w-4 h-4 text-gray-900 bg-gray-100 border-gray-300 rounded focus:ring-black dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" @change="SelectCommission(item, $event.target.checked)">
+                    <label :for="`checkbox-item-`+ item.id" class="w-full ms-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">{{item.user_name}}</label>
                 </div>
             </li>
         </ul>
@@ -175,7 +172,7 @@
             <svg class="w-4 h-4 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
                 <path d="M6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Zm11-3h-6a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2Z"/>
             </svg>
-            Delete user
+            Удалить
         </a>
     </div>
 
@@ -199,11 +196,7 @@
                 <div class="p-4 md:p-5 space-y-4">
                     <form class="max-w-sm">
                         <select id="underline_select" class="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 border-gray-200 appearance-none dark:text-gray-400 dark:border-gray-700 focus:outline-none focus:ring-0 focus:border-gray-200 peer">
-                            <option selected>Выбор преподавателя</option>
-                            <option value="US">United States</option>
-                            <option value="CA">Canada</option>
-                            <option value="FR">France</option>
-                            <option value="DE">Germany</option>
+                            <option v-for="item in selectedItems" :key="item.id" :value="item.id">{{item.user_name}}</option>
                         </select>
                     </form>
                     <label for="message" class="block mb-2 text-sm font-medium text-white">Введите вопрос</label>
@@ -223,16 +216,40 @@
 
 <script>
 import { Modal } from 'flowbite';
+import FileServices from '../services/file.service';
+import UserService from '../services/user.service';
 export default{
     data() {
         return {
-            selectFile: null
+            selectFile: null,
+            filelist: [],
+            students: [],
+            UsersCommission: [],
+            selectedDate: '',
+            selectedItems: [],
+            selectedItemDetails: null
         }
+    },
+    mounted() {
+        FileServices.getfilelist().then(
+            response => {
+                this.filelist = response.data.file_list;
+            }
+        );
+        UserService.getUserCommission().then(
+            (response) => {
+                this.UsersCommission = response.data.users_commission;
+            }
+        );
     },
     methods:{
         fileprotocol(event){
             const file = event.target.files[0];
             this.selectFile = file;
+            if(this.selectFile != null){
+                document.getElementById('textprotocol').innerText = file.name;
+                document.getElementById('textformatdata').innerText = '';
+            }
         },
         ImportProtocol(){
             let formData = { 
@@ -246,10 +263,33 @@ export default{
                         const modal = new Modal($targetEl);
                         modal.hide();
                     }
-                    console.log(response)
                 }
             );
         },
+        GetInfoFromFile(item){
+            FileServices.getinfofromfile(item).then(
+                response => {
+                    this.students = response.students;
+                }
+            )
+        },
+        SelectCommission(item, checked){
+            if (checked) {
+                this.selectedItems.push(item);
+            } else {
+                const index = this.selectedItems.indexOf(item);
+                if (index !== -1) {
+                    this.selectedItems.splice(index, 1);
+                }
+            }
+        },
+        toggleDetails(item) {
+            if (this.selectedItemDetails && this.selectedItemDetails.id === item.id) {
+                this.selectedItemDetails = null;
+            } else {
+                this.selectedItemDetails = item;
+            }
+        }
     }
 }
 
