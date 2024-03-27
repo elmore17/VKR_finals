@@ -24,6 +24,12 @@ class FileServices{
             return response.data;
         })
     }
+    getquestioncommission({ id }){
+        return api.get('/questioncommission?id=' + id)
+        .then(response =>{
+            return response.data;
+        })
+    }
 }
 
 export default new FileServices();

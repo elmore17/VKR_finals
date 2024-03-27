@@ -286,5 +286,22 @@ def get_info_from_file():
             students_list.append(students_dict)
     return make_response(jsonify({'students': students_list}), 200)
 
+@app.route('/questioncommission', methods=['GET', 'POST'])
+def question_commission():
+    if request.method == 'GET':
+        id = request.args.get('id')
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('select uc.user_name, pi2.text_issues from protection_issues pi2, users_commission uc where pi2.id_student = %s and pi2.id_user_commission = uc.id_user', (id,))
+            data_questions = cursor.fetchall()
+            questions_list = []
+            for question in data_questions:
+                questions_dict = {
+                    'name': question[0],
+                    'title': question[1]
+                }
+                questions_list.append(questions_dict)
+        return make_response(jsonify({'questions': questions_list}), 200)
+
             
 app.run(host='0.0.0.0', port=83)

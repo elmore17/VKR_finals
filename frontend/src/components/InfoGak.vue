@@ -73,7 +73,7 @@
                         </div>
                     </div>
                     <div class="border h-11 pl-5 pt-3 rounded-b-xl colorboxbottom flex flex-row">
-                        <p class="cursordrop text-xs mr-1">ФИО; ю ноу</p>
+                        <p v-for="item in questions" :key="item.title" class="cursordrop text-xs mr-1">{{ item.name }}-{{ item.title }}</p>
                     </div>
                 </div>
             </div>
@@ -195,16 +195,16 @@
                 <!-- Modal body -->
                 <div class="p-4 md:p-5 space-y-4">
                     <form class="max-w-sm">
-                        <select id="underline_select" class="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 border-gray-200 appearance-none dark:text-gray-400 dark:border-gray-700 focus:outline-none focus:ring-0 focus:border-gray-200 peer">
+                        <select v-model="idCommissionUser" id="underline_select" class="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 border-gray-200 appearance-none dark:text-gray-400 dark:border-gray-700 focus:outline-none focus:ring-0 focus:border-gray-200 peer">
                             <option v-for="item in selectedItems" :key="item.id" :value="item.id">{{item.user_name}}</option>
                         </select>
                     </form>
                     <label for="message" class="block mb-2 text-sm font-medium text-white">Введите вопрос</label>
-                    <textarea id="message" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300" placeholder="Ваш текст..."></textarea>
+                    <textarea v-model="textQuestion" id="message" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300" placeholder="Ваш текст..."></textarea>
                 </div>
                 <!-- Modal footer -->
                 <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-                    <button  class="py-2.5 px-5 ms-3 text-sm font-medium tbg rounded-lg">
+                    <button @click="AddQuestion()" class="py-2.5 px-5 ms-3 text-sm font-medium tbg rounded-lg">
                         Добавить вопрос
                     </button>
                     <button data-modal-hide="AddQuestionStudents" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Отмена</button>
@@ -227,7 +227,10 @@ export default{
             UsersCommission: [],
             selectedDate: '',
             selectedItems: [],
-            selectedItemDetails: null
+            selectedItemDetails: null,
+            questions: [],
+            idCommissionUser: null,
+            textQuestion: null
         }
     },
     mounted() {
@@ -286,8 +289,21 @@ export default{
         toggleDetails(item) {
             if (this.selectedItemDetails && this.selectedItemDetails.id === item.id) {
                 this.selectedItemDetails = null;
+                this.questions = [];
             } else {
                 this.selectedItemDetails = item;
+                FileServices.getquestioncommission(item).then(
+                    response => {
+                        this.questions = response.questions;
+                    }
+                )
+            }
+        },
+        AddQuestion(){
+            if(this.selectedItemDetails != null){ //нужно дописать исключение
+                let idUserCommission = this.idCommissionUser;
+                let idStudent = this.selectedItemDetails.id;
+                let textQuestion = this.textQuestion;
             }
         }
     }
