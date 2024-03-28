@@ -302,6 +302,100 @@ def question_commission():
                 }
                 questions_list.append(questions_dict)
         return make_response(jsonify({'questions': questions_list}), 200)
+    if request.method == 'POST':
+        post_data = request.get_json()
+        idUserCommission = post_data.get('idUserCommission')
+        idStudent = post_data.get('idStudent')
+        textQuestion = post_data.get('textQuestion')
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO protection_issues (id_student, id_user_commission, text_issues) VALUES (%s, %s, %s)", (idStudent, idUserCommission, textQuestion))
+            conn.commit()
+        return make_response(jsonify({'status': 'success'}))
+    
+@app.route('/estimates', methods=['GET', 'POST'])
+def estimates():
+    if request.method == 'GET':
+        id = request.args.get('id')
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('select id from assessments where id_student=%s', (id,))
+            estimates_check = cursor.fetchone()
+            if (estimates_check != None):
+                cursor.execute('select a.score_graduate_work, ee.text, a.score_graduate from assessments a, existing_estimates ee where a.id_student = %s and a.score_graduate_work = ee.id', (id,))
+                estimates = cursor.fetchone()
+                estimates_list = []
+                estimates_dict = {
+                    'value': estimates[0],
+                    'title': estimates[1],
+                    'value_graduate': estimates[2]
+                }
+                estimates_list.append(estimates_dict)
+        return make_response(jsonify({'estimates': estimates_list}))
+    if request.method == 'POST':
+        post_data = request.get_json()
+        student_id = post_data.get('student_id')
+        score_gw = post_data.get('score_gw')
+        score_g = post_data.get('score_g')
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('select id_student from assessments where id_student = %s', (student_id,))
+            existing_assessments = cursor.fetchone()
+            if existing_assessments is None:
+                cursor.execute("INSERT INTO assessments (id_student, score_graduate_work, score_graduate) VALUES (%s, %s, %s)", (student_id, score_gw, score_g))
+                conn.commit()
+            else:
+                cursor.execute("UPDATE assessments SET score_graduate_work = %s, score_graduate = %s WHERE id_student = %s", (score_gw, score_g, student_id))
+                conn.commit()
+        return make_response(jsonify({'status': 'success'}))
+     
+@app.route('/get_estimatesvkr', methods=['GET'])
+def estimates_vkr():
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('select * from existing_estimates')
+        estimates = cursor.fetchall()
+        estimates_list = []
+        for estimat in estimates:
+            estimates_dict = {
+                'id': estimat[0],
+                'name': estimat[1],
+                'title': estimat[2]
+            }
+            estimates_list.append(estimates_dict)
+    return make_response(jsonify({'estimates': estimates_list}), 200)
+
+@app.route('/checkstatus', methods=['GET'])
+def check_status_user():
+    id = request.args.get('id')
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('select * from assessments where id_student = %s', (id,))
+        assessments = cursor.fetchone()
+        cursor.execute('select * from protection_issues where id_student = %s', (id,))
+        protection_issues = cursor.fetchone()
+        if (assessments != None and protection_issues != None):
+            state = True
+        else:
+            state = False
+    return make_response(jsonify({'state': state}))
+
+@app.route('/get_estimatesdip', methods=['GET'])
+def estimates_dip():
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('select * from graduate_estimates')
+        estimates = cursor.fetchall()
+        estimates_list = []
+        for estimat in estimates:
+            estimates_dict = {
+                'id': estimat[0],
+                'name': estimat[1]
+            }
+            estimates_list.append(estimates_dict)
+    return make_response(jsonify({'estimates': estimates_list}), 200)
+
+
 
             
 app.run(host='0.0.0.0', port=83)

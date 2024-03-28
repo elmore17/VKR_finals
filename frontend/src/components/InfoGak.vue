@@ -72,8 +72,38 @@
                             </button>
                         </div>
                     </div>
-                    <div class="border h-11 pl-5 pt-3 rounded-b-xl colorboxbottom flex flex-row">
-                        <p v-for="item in questions" :key="item.title" class="cursordrop text-xs mr-1">{{ item.name }}-{{ item.title }}</p>
+                    <div class="border h-11 pl-5 pt-3 rounded-b-xl colorboxbottom overflow-x-auto">
+                        <div v-for="item in questions" class="cursor-pointer hover:font-extralight">
+                            <p :key="item.title" class="cursordrop text-xs mr-1">{{ item.name }} - {{ item.title }}</p>
+                        </div>    
+                    </div>
+                </div>
+            </div>
+            <div v-if="selectedItemDetails != null" class="grid grid-cols-2 mt-5  gap-5 max-w-3xl">
+                <div class="mt-5">
+                    <div class="border max-w-96 h-28 pl-5 pt-5 rounded-t-xl colorboxinfo">
+                        <p class="text-white font-medium text-lg pb-2">Оценка за ВКР</p>
+                        <div class="relative max-w-sm">
+                            <select v-model="estimatesVKR" id="estimatesVKR" class="bg-none border-dashed containercolorinfo text-sm rounded-3xl block w-44 ps-3 p-2.5 border-collapse" @change="addEstimates()">
+                                <option v-for="item in estimates" :key="item.id" :value="item.id">{{ item.name }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="border max-w-96 h-11 pl-5 pt-3 rounded-b-xl colorboxbottom overflow-x-auto">
+                        <p class="cursordrop text-xs">{{ estimatesVKR_Title }}</p>
+                    </div>
+                </div>
+                <div class="mt-5">
+                    <div class="border max-w-96 h-28 pl-5 pt-5 rounded-t-xl colorboxinfo">
+                        <p class="text-white font-medium text-lg pb-2">Дипломная оценка</p>
+                        <div class="">
+                            <select v-model="estimatesDip" id="estimatesDip" class="bg-none border-dashed containercolorinfo text-sm rounded-3xl block w-44 ps-3 p-2.5 border-collapse" @change="addEstimates()">
+                                <option v-for="item in estimates_dip" :key="item.id"  :value="item.id">{{ item.name }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="border max-w-96 h-11 pl-5 pt-3 rounded-b-xl colorboxbottom">
+                        <p class="cursordrop text-xs"></p>
                     </div>
                 </div>
             </div>
@@ -100,11 +130,12 @@
                 <p class="text-white font-medium text-lg pb-2 text-start">Студенты</p>
                 <div class="flex flex-row justify-between mt-7">
                     <p class="text-white">Заполненных студентов</p>
-                    <p style="color: #71717A;">0/{{students.length}}</p>
+                    <p style="color: #71717A;">{{ count }} / {{ students.length }}</p>
                 </div>
-                <div class="w-full bg-gray-200 rounded-full dark:bg-gray-700 mt-1">
-                    <div class="tbg text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" style="width: 45%"> 45%</div>
+                <div  class="w-full bg-gray-200 rounded-full dark:bg-gray-700 mt-1">
+                    <div class="tbg text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" :style="{'width': wigth}"> {{ wigth }}</div>
                 </div>
+                <button v-if="wigth == '100%'"  class="tbg px-2 mt-2 w-full rounded-xl">Скачать протокол</button>
             </div>
             <div class="overflow-auto border rounded-b-xl colorboxbottom max-h-60">
                 <div v-for="item in students" :key="item.id" class=" h-11 pl-5 pt-2 hover:bg-white rounded-b-xl cursor-pointer" :class="{ 'bg-white': item === selectedItemDetails }" @click="toggleDetails(item)">
@@ -230,7 +261,14 @@ export default{
             selectedItemDetails: null,
             questions: [],
             idCommissionUser: null,
-            textQuestion: null
+            textQuestion: null,
+            estimates: [],
+            estimates_dip: [],
+            estimatesVKR: '',
+            estimatesVKR_Title: '',
+            estimatesDip: '',
+            count: 0,
+            wigth: '0%'
         }
     },
     mounted() {
@@ -273,8 +311,19 @@ export default{
             FileServices.getinfofromfile(item).then(
                 response => {
                     this.students = response.students;
+                    this.students.forEach((element) => 
+                        FileServices.checkstateuser(element).then(
+                            response => {
+                                this.count = 0;
+                                if (response.state == true){
+                                    this.count += 1;
+                                    this.wigth = (this.count/this.students.length) * 100 + '%';
+                                }
+                            }
+                        )
+                    );
                 }
-            )
+            );
         },
         SelectCommission(item, checked){
             if (checked) {
@@ -290,21 +339,100 @@ export default{
             if (this.selectedItemDetails && this.selectedItemDetails.id === item.id) {
                 this.selectedItemDetails = null;
                 this.questions = [];
+                this.estimates = [];
+                this.estimates_dip = [];
+                this.estimatesVKR = '';
+                this.estimatesVKR_Title = '';
             } else {
                 this.selectedItemDetails = item;
                 FileServices.getquestioncommission(item).then(
                     response => {
                         this.questions = response.questions;
                     }
+                );
+                FileServices.getestimates().then(
+                    response => {
+                        this.estimates = response.data.estimates;
+                    }
+                );
+                FileServices.getestimatesdip().then(
+                    response => {
+                        this.estimates_dip = response.data.estimates;
+                    }
                 )
+                FileServices.getestimatesuser(item).then(
+                    response => {
+                        this.estimatesVKR = response.estimates[0].value;
+                        this.estimatesVKR_Title = response.estimates[0].title;
+                        this.estimatesDip = response.estimates[0].value_graduate;
+                    }
+                );
+                this.students.forEach((element) => 
+                    FileServices.checkstateuser(element).then(
+                        response => {
+                            this.count = 0;
+                            if (response.state == true){
+                                this.count += 1;
+                                this.wigth = (this.count/this.students.length) * 100 + '%';
+                            }
+                        }
+                    )
+                );
             }
         },
         AddQuestion(){
-            if(this.selectedItemDetails != null){ //нужно дописать исключение
-                let idUserCommission = this.idCommissionUser;
-                let idStudent = this.selectedItemDetails.id;
-                let textQuestion = this.textQuestion;
+            if(this.selectedItemDetails != null && this.idCommissionUser != null && this.textQuestion != null){ //нужно дописать исключение
+                let formData = { 
+                    idUserCommission: this.idCommissionUser,
+                    idStudent: this.selectedItemDetails.id,
+                    textQuestion: this.textQuestion
+                };
+                this.$store.dispatch('file/addquestioncommission', formData).then(
+                    response => {
+                        if(response.status == 'success'){
+                            const $targetEl = document.getElementById("AddQuestionStudents");
+                            const modal = new Modal($targetEl);
+                            modal.hide();
+                            FileServices.getquestioncommission(this.selectedItemDetails).then(
+                                response => {
+                                    this.questions = response.questions;
+                                }
+                            );
+                        }
+                    }
+                );
             }
+        },
+        addEstimates(){
+            let formData = { 
+                student_id: this.selectedItemDetails.id,
+                score_gw: this.estimatesVKR,
+                score_g: this.estimatesDip
+            };
+            this.$store.dispatch('file/updateestimatesuser', formData).then(
+                response => {
+                    if(response.status == 'success'){
+                        FileServices.getestimatesuser(this.selectedItemDetails).then(
+                            response => {
+                                this.estimatesVKR = response.estimates[0].value;
+                                this.estimatesVKR_Title = response.estimates[0].title;
+                                this.estimatesDip = response.estimates[0].value_graduate;
+                            }
+                        );
+                    }
+                }
+            );
+            this.students.forEach((element) => 
+                FileServices.checkstateuser(element).then(
+                    response => {
+                        this.count = 0;
+                        if (response.state == true){
+                            this.count += 1;
+                            this.wigth = (this.count/this.students.length) * 100 + '%';
+                        }
+                    }
+                )
+            );
         }
     }
 }

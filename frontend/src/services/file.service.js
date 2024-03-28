@@ -18,17 +18,57 @@ class FileServices{
     getfilelist(){
         return api.get('/uploadfile');
     }
+    getestimates(){
+        return api.get('/get_estimatesvkr');
+    }
+    getestimatesdip(){
+        return api.get('/get_estimatesdip');
+    }
     getinfofromfile({ id }){
         return api.get('/getinfofromfile?id=' + id)
         .then(response => {
             return response.data;
-        })
+        });
     }
     getquestioncommission({ id }){
         return api.get('/questioncommission?id=' + id)
         .then(response =>{
             return response.data;
-        })
+        });
+    }
+    addquestioncommission({ idUserCommission, idStudent, textQuestion }){
+        return api.post('/questioncommission',{
+            idUserCommission,
+            idStudent,
+            textQuestion
+        }).then(
+            response => {
+                return response.data;
+            }
+        );
+    }
+    getestimatesuser({ id }){
+        return api.get('/estimates?id=' + id)
+        .then(response => {
+            return response.data;
+        });
+    }
+    updateestimatesuser({student_id, score_gw, score_g}){
+        return api.post('/estimates',{
+            student_id,
+            score_gw,
+            score_g
+        }).then(
+            response => {
+                return response.data;
+            }
+        )
+    }
+    checkstateuser({ id }){
+        return api.get('/checkstatus?id=' + id)
+        .then(response => {
+            return response.data;
+        });
     }
 }
 
