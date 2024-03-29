@@ -70,6 +70,18 @@ class FileServices{
             return response.data;
         });
     }
+    downloadfile({fileID, date, namepred, userscommission}){
+        return api.post('/downloadfile', {
+            fileID,
+            date,
+            namepred,
+            userscommission
+        }).then(
+            response => {
+                return response.data;
+            }
+        )
+    }
 }
 
 export default new FileServices();

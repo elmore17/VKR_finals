@@ -23,7 +23,7 @@
                                     <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
                                 </svg>
                             </div>
-                            <input v-model="selectedDate"  id="datepicker" datepicker datepicker-buttons datepicker-autohide datepicker-autoselect-today datepicker-format="dd/mm/yyyy" type="text" class="bg-none border-dashed containercolorinfo text-sm rounded-3xl block w-44 h-7 ps-10 p-2.5 border-collapse" placeholder="Выберете дату">
+                            <input id="datepicker" datepicker datepicker-buttons datepicker-autohide datepicker-autoselect-today datepicker-format="yyyy-mm-dd" type="text" class="bg-none border-dashed containercolorinfo text-sm rounded-3xl block w-44 h-7 ps-10 p-2.5 border-collapse" placeholder="Выберете дату">
                         </div>
                     </div>
                     <div class="border max-w-96 h-11 pl-5 pt-3 rounded-b-xl colorboxbottom">
@@ -34,7 +34,7 @@
                     <div class="border max-w-96 h-28 pl-5 pt-5 rounded-t-xl colorboxinfo">
                         <p class="text-white font-medium text-lg pb-2">Председатель ГЭК</p>
                         <div class="">
-                            <input type="text" list="names" class="bg-none border-dashed containercolorinfo text-sm rounded-3xl block w-44 h-7 ps-3 p-2.5 border-collapse" placeholder="ФИО">
+                            <input v-model="selectNamePred"  type="text" list="names" class="bg-none border-dashed containercolorinfo text-sm rounded-3xl block w-44 h-7 ps-3 p-2.5 border-collapse" placeholder="ФИО">
                             <datalist id="names">
                                 <option v-for="item in UsersCommission" :key="item.id" :value=item.user_name></option>
                             </datalist>
@@ -135,7 +135,7 @@
                 <div  class="w-full bg-gray-200 rounded-full dark:bg-gray-700 mt-1">
                     <div class="tbg text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" :style="{'width': wigth}"> {{ wigth }}</div>
                 </div>
-                <button v-if="wigth == '100%'"  class="tbg px-2 mt-2 w-full rounded-xl">Скачать протокол</button>
+                <button v-if="wigth == '100%'" class="tbg px-2 mt-2 w-full rounded-xl" @click="DownloadDOCX">Скачать протокол</button>
             </div>
             <div class="overflow-auto border rounded-b-xl colorboxbottom max-h-60">
                 <div v-for="item in students" :key="item.id" class=" h-11 pl-5 pt-2 hover:bg-white rounded-b-xl cursor-pointer" :class="{ 'bg-white': item === selectedItemDetails }" @click="toggleDetails(item)">
@@ -227,7 +227,7 @@
                 <div class="p-4 md:p-5 space-y-4">
                     <form class="max-w-sm">
                         <select v-model="idCommissionUser" id="underline_select" class="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 border-gray-200 appearance-none dark:text-gray-400 dark:border-gray-700 focus:outline-none focus:ring-0 focus:border-gray-200 peer">
-                            <option v-for="item in selectedItems" :key="item.id" :value="item.id">{{item.user_name}}</option>
+                            <option v-for="item in UsersCommission" :key="item.id" :value="item.id">{{item.user_name}}</option>
                         </select>
                     </form>
                     <label for="message" class="block mb-2 text-sm font-medium text-white">Введите вопрос</label>
@@ -253,6 +253,8 @@ export default{
     data() {
         return {
             selectFile: null,
+            selectFileDownload: null,
+            selectNamePred: null,
             filelist: [],
             students: [],
             UsersCommission: [],
@@ -308,13 +310,15 @@ export default{
             );
         },
         GetInfoFromFile(item){
+            this.selectFileDownload = null;
+            this.selectFileDownload = item;
             FileServices.getinfofromfile(item).then(
                 response => {
                     this.students = response.students;
+                    this.count = 0;
                     this.students.forEach((element) => 
                         FileServices.checkstateuser(element).then(
                             response => {
-                                this.count = 0;
                                 if (response.state == true){
                                     this.count += 1;
                                     this.wigth = (this.count/this.students.length) * 100 + '%';
@@ -362,15 +366,17 @@ export default{
                 )
                 FileServices.getestimatesuser(item).then(
                     response => {
-                        this.estimatesVKR = response.estimates[0].value;
-                        this.estimatesVKR_Title = response.estimates[0].title;
-                        this.estimatesDip = response.estimates[0].value_graduate;
+                        if(response.estimates.length != 0){
+                            this.estimatesVKR = response.estimates[0].value;
+                            this.estimatesVKR_Title = response.estimates[0].title;
+                            this.estimatesDip = response.estimates[0].value_graduate;
+                        } 
                     }
                 );
+                this.count = 0;
                 this.students.forEach((element) => 
                     FileServices.checkstateuser(element).then(
                         response => {
-                            this.count = 0;
                             if (response.state == true){
                                 this.count += 1;
                                 this.wigth = (this.count/this.students.length) * 100 + '%';
@@ -419,6 +425,17 @@ export default{
                                 this.estimatesDip = response.estimates[0].value_graduate;
                             }
                         );
+                        this.count = 0;
+                        this.students.forEach((element) => 
+                            FileServices.checkstateuser(element).then(
+                                response => {
+                                    if (response.state == true){
+                                        this.count += 1;
+                                        this.wigth = (this.count/this.students.length) * 100 + '%';
+                                    }
+                                }
+                            )
+                        );
                     }
                 }
             );
@@ -432,6 +449,20 @@ export default{
                         }
                     }
                 )
+            );
+        },
+        DownloadDOCX(){
+            this.selectedDate = document.getElementById('datepicker').value;
+            let formData = {
+                fileID: this.selectFileDownload.id,
+                date: this.selectedDate,
+                namepred: this.selectNamePred,
+                userscommission: this.UsersCommission
+            }
+            this.$store.dispatch('file/downloadfile', formData).then(
+                response => {
+                    console.log(response);
+                }
             );
         }
     }

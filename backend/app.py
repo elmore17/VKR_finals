@@ -1,4 +1,4 @@
-from flask import  session, jsonify, request, Flask, make_response
+from flask import  session, jsonify, request, Flask, make_response, send_file
 import psycopg2
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
@@ -6,7 +6,7 @@ import jwt
 from functools import wraps
 from datetime import datetime, timedelta
 from pathlib import Path
-from docxcreate import read_docx
+from docxcreate import read_docx, create_draft
 # instantiate the app
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -319,18 +319,19 @@ def estimates():
         id = request.args.get('id')
         with get_db_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('select id from assessments where id_student=%s', (id,))
+            cursor.execute('select id from assessments where id_student= %s', (id,))
             estimates_check = cursor.fetchone()
-            if (estimates_check != None):
-                cursor.execute('select a.score_graduate_work, ee.text, a.score_graduate from assessments a, existing_estimates ee where a.id_student = %s and a.score_graduate_work = ee.id', (id,))
-                estimates = cursor.fetchone()
-                estimates_list = []
-                estimates_dict = {
-                    'value': estimates[0],
-                    'title': estimates[1],
-                    'value_graduate': estimates[2]
-                }
-                estimates_list.append(estimates_dict)
+            if (estimates_check is None):
+                return make_response(jsonify({'estimates': []}))
+            cursor.execute('select a.score_graduate_work, ee.text, a.score_graduate from assessments a, existing_estimates ee where a.id_student = %s and a.score_graduate_work = ee.id', (id,))
+            estimates = cursor.fetchone()
+            estimates_list = []
+            estimates_dict = {
+                'value': estimates[0],
+                'title': estimates[1],
+                'value_graduate': estimates[2]
+            }
+            estimates_list.append(estimates_dict)
         return make_response(jsonify({'estimates': estimates_list}))
     if request.method == 'POST':
         post_data = request.get_json()
@@ -394,6 +395,28 @@ def estimates_dip():
             }
             estimates_list.append(estimates_dict)
     return make_response(jsonify({'estimates': estimates_list}), 200)
+
+@app.route('/downloadfile', methods=['POST'])
+def download_file():
+    post_data = request.get_json()
+    file_id = post_data.get('fileID')
+    date = post_data.get('date')
+    namepred = post_data.get('namepred')
+    userscommission = post_data.get('userscommission')
+    if date == '':
+        today = datetime.today()
+        date = today.strftime('%Y-%m-%d')
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE graduate_work SET date_start = %s WHERE id_filepath = %s", (date, file_id))
+        conn.commit()
+        cursor.execute("select gw.date_start ,d.name_direction, s.id, s.name, s.title_gradual_work, sa.name_adviser, sa.role from graduate_work gw, direction d, students s, scientific_adviser sa where gw.id_filepath = %s and gw.id_student = s.id and gw.id_scientific_adviser = sa.id", (file_id,))
+        info = cursor.fetchall()
+    output_path = 'combined_generated_docx.docx'
+    create_draft(info, output_path, namepred, userscommission)
+    
+    return make_response(jsonify({'date': date}), 200)
+    
 
 
 
