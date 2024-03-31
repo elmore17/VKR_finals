@@ -397,7 +397,8 @@ def estimates_dip():
     return make_response(jsonify({'estimates': estimates_list}), 200)
 
 @app.route('/downloadfile', methods=['POST'])
-def download_file():
+@token_required
+def download_file(current_user):
     post_data = request.get_json()
     file_id = post_data.get('fileID')
     date = post_data.get('date')
@@ -410,10 +411,10 @@ def download_file():
         cursor = conn.cursor()
         cursor.execute("UPDATE graduate_work SET date_start = %s WHERE id_filepath = %s", (date, file_id))
         conn.commit()
-        cursor.execute("select gw.date_start ,d.name_direction, s.id, s.name, s.title_gradual_work, sa.name_adviser, sa.role from graduate_work gw, direction d, students s, scientific_adviser sa where gw.id_filepath = %s and gw.id_student = s.id and gw.id_scientific_adviser = sa.id", (file_id,))
+        cursor.execute("select gw.date_start ,d.name_direction, s.id, s.name, s.title_gradual_work, sa.name_adviser, sa.role, le.name_level_education, s2.name_speciality  from graduate_work gw, direction d, students s, scientific_adviser sa, level_education le, speciality s2 where gw.id_filepath = %s and gw.id_student = s.id and gw.id_scientific_adviser = sa.id and le.id = gw.id_level_education and s2.id = gw.id_speciality", (file_id,))
         info = cursor.fetchall()
     output_path = 'combined_generated_docx.docx'
-    create_draft(info, output_path, namepred, userscommission)
+    create_draft(info, output_path, namepred, userscommission, current_user)
     
     return make_response(jsonify({'date': date}), 200)
     

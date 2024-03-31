@@ -27,7 +27,7 @@ def read_docx(docx_path, items_per_subarray=142):
     return divided_data
 
 # Вставка данных в шаблон
-def create_draft(data, output_docx_path, namepred, userscommission):
+def create_draft(data, output_docx_path, namepred, userscommission, current_user):
     doc = DocxTemplate('shablon.docx')
     
     combined_doc = Document()
@@ -48,11 +48,22 @@ def create_draft(data, output_docx_path, namepred, userscommission):
             'nauchruc': item[5],
             'rang': item[6],
             'student': item[3],
-            'predgossokr': namepred,
+            'kval': item[7],
+            'spec': item[8]
         }
 
         for i, usercommission in enumerate(userscommission, start=1):
-            context['namegoskom' + str(i)] = usercommission['user_name']
+            parts = usercommission['user_name'].split()
+            last_name = parts[0]
+            initials = ''.join([name[0] + '.' for name in parts[1:]])
+            shortened_name = f"{last_name} {initials}"
+            context['namegoskom' + str(i)] = shortened_name
+
+        parts = namepred.split()
+        last_name = parts[0]
+        initials = ''.join([name[0] + '.' for name in parts[1:]])
+        shortened_name = f"{last_name} {initials}"
+        context['predgossokr'] = shortened_name
 
         with get_db_connection() as conn:
             cursor = conn.cursor()
@@ -70,11 +81,31 @@ def create_draft(data, output_docx_path, namepred, userscommission):
             for i in range(len(questions)):
                 context['question' + str(i+1)] = questions[i]['name']+ ' ' + str(' '.join(questions[i]['question']))
 
-            cursor.execute('select ee.name, ee.text from assessments a, existing_estimates ee where a.id_student = %s and a.score_graduate_work = ee.id', (item[2],))
+            cursor.execute('select ee.name, ee.text, ge.name from assessments a, existing_estimates ee, graduate_estimates ge where a.id_student = %s and a.score_graduate_work = ee.id and a.score_graduate = ge.id_estimates', (item[2],))
             score = cursor.fetchone()
             context['score'] = score[0]
-            context['haracteransver1'] = score[1]
-                    
+            context['scorediplom'] = score[2]
+            lines = score[1].split(',')
+            for i in range(len(lines)):
+                if i < len(lines) - 1:
+                    context['haracteransver' + str(i+1)] = lines[i] + ','
+                else:
+                    context['haracteransver' + str(i+1)] = lines[i]
+            
+            context['ekzscore'] = "не предусмотрен учебным планом"
+            context['nodata'] = "–"
+            data_start = str(item[0]).split('-')
+            context['data'] = data_start[2] + '.' + data_start[1] + '.' + data_start[0] 
+            
+            context['studentU'] = item[3] 
+            
+            cursor.execute('select name from adminbd where user_name = %s',(current_user,)) 
+            namesekret = cursor.fetchone()
+            parts = namesekret[0].split()
+            last_name = parts[0]
+            initials = ''.join([name[0] + '.' for name in parts[1:]])
+            shortened_name = f"{last_name} {initials}"
+            context['sekretgossokr'] = shortened_name
                      
             
         doc.render(context)
