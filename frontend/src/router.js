@@ -4,6 +4,7 @@ import Authorization from './components/Authorization.vue';
 import Registration from './components/Registration.vue';
 import { createRouter, createWebHistory } from "vue-router"
 import MainPage from './components/MainPage.vue';
+import Kafedr from './components/Kafedr.vue';
 
 const routeInfos = [
     {
@@ -20,6 +21,11 @@ const routeInfos = [
         path: "/mainpage",
         name: MainPage,
         component: MainPage
+    },
+    {
+        path: "/kafedr",
+        name: Kafedr,
+        component: Kafedr
     }
 ]
 
