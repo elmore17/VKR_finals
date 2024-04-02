@@ -7,6 +7,15 @@
     <button type="submit" @click.prevent = "onSubmit"  class="mb-3 text-white tbg w-48 pt-1 pb-1 rounded font-sans">Войти</button>
     <a href="/registration" class="mb-7 font-sans text-slate-500/60">Зарегистрироваться</a>
   </form>
+  <div v-if=" this.message != '' "  id="error" class="flex items-center p-4 mb-4 text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 absolute right-0 bottom-0 w-52" role="alert">
+    <svg class="flex-shrink-0 w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+      <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+    </svg>
+    <span class="sr-only">Info</span>
+    <div class="ms-3 text-sm font-medium">
+      {{ this.message }}
+    </div>
+  </div>
 </template>
 
 <script>
@@ -16,6 +25,7 @@ export default{
     return {
       login: '',
       password: '',
+      message: ''
     }
   },
   computed:{
@@ -37,6 +47,14 @@ export default{
       this.$store.dispatch("auth/login", formData).then(
         () => {
           this.$router.push("/mainpage");
+        },
+        (error) => {
+          this.loading = false;
+          this.message =
+            'Неверный логин или пароль';
+            setTimeout(() => {
+                this.message = '';
+            }, 5000);
         }
       );
     }

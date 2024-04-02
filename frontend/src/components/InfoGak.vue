@@ -47,22 +47,6 @@
                 <div class="mt-5 col-span-2">
                     <div class="border h-28 pl-5 pt-5 rounded-t-xl colorboxinfo">
                         <div class="flex justify-between flex-nowrap items-start">
-                            <p class="text-white font-medium text-lg pb-2">Члены ГЭК</p>
-                            <button data-dropdown-toggle="AddGosCommission"  class="flex flex-row items-center tbg px-2 mr-5 rounded-xl">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                </svg>
-                                Добавить
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex flex-col flex-wrap content-start border h-11 pl-5 pt-3 rounded-b-xl colorboxbottom overflow-x-auto">
-                        <p v-for="item in selectedItems" :key="item.id"  class="cursordrop text-xs mr-1">{{item.user_name}},</p>
-                    </div>
-                </div>
-                <div class="mt-5 col-span-2">
-                    <div class="border h-28 pl-5 pt-5 rounded-t-xl colorboxinfo">
-                        <div class="flex justify-between flex-nowrap items-start">
                             <p class="text-white font-medium text-lg pb-2">Вопросы</p>
                             <button data-modal-target="AddQuestionStudents" data-modal-toggle="AddQuestionStudents"  class="flex flex-row items-center tbg px-2 mr-5 rounded-xl">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
@@ -79,7 +63,7 @@
                     </div>
                 </div>
             </div>
-            <div v-if="selectedItemDetails != null" class="grid grid-cols-2 mt-5  gap-5 max-w-3xl">
+            <div v-if="selectedItemDetails != null" class="grid grid-cols-3 mt-5 gap-5 max-w-3xl">
                 <div class="mt-5">
                     <div class="border max-w-96 h-28 pl-5 pt-5 rounded-t-xl colorboxinfo">
                         <p class="text-white font-medium text-lg pb-2">Оценка за ВКР</p>
@@ -106,6 +90,22 @@
                         <p class="cursordrop text-xs"></p>
                     </div>
                 </div>
+                <div class="mt-5">
+                    <div class="border max-w-96 h-28 pl-5 pt-5 rounded-t-xl colorboxinfo">
+                        <p class="text-white font-medium text-lg pb-2">Дата окончания</p>
+                        <div class="relative max-w-sm">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                                </svg>
+                            </div>
+                            <input id="datepicker_end" datepicker datepicker-buttons datepicker-autohide datepicker-autoselect-today datepicker-format="yyyy-mm-dd" type="text" class="bg-none border-dashed containercolorinfo text-sm rounded-3xl block w-44 h-7 ps-10 p-2.5 border-collapse" placeholder="Выберете дату">
+                        </div>
+                    </div>
+                    <div class="border max-w-96 h-11 pl-5 pt-3 rounded-b-xl colorboxbottom">
+                        <p class="cursordrop text-xs"></p>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -120,7 +120,7 @@
                     </svg>
                     <p class="text-white">{{item.file_name}}</p>
                 </div>
-                    <p style="color: #71717A;">03.03.24</p>
+                    <p style="color: #71717A;">{{ item.date }}</p>
                 </div>
             </div>
             
@@ -135,7 +135,7 @@
                 <div  class="w-full bg-gray-200 rounded-full dark:bg-gray-700 mt-1">
                     <div class="tbg text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" :style="{'width': wigth}"> {{ wigth }}</div>
                 </div>
-                <button v-if="wigth == '100%'" class="tbg px-2 mt-2 w-full rounded-xl" @click="DownloadDOCX">Скачать протокол</button>
+                <button v-if="wigth == '100%' && count == students.length" class="tbg px-2 mt-2 w-full rounded-xl" @click="DownloadDOCX">Скачать протокол</button>
             </div>
             <div class="overflow-auto border rounded-b-xl colorboxbottom max-h-60">
                 <div v-for="item in students" :key="item.id" class=" h-11 pl-5 pt-2 hover:bg-white rounded-b-xl cursor-pointer" :class="{ 'bg-white': item === selectedItemDetails }" @click="toggleDetails(item)">
@@ -189,24 +189,6 @@
         </div>
     </div>
 
-
-    <div id="AddGosCommission" class="z-10 hidden bg-white rounded-lg shadow w-60 dark:bg-gray-700">
-        <ul class="h-48 px-3 pb-3 overflow-y-auto text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownSearchButton">
-            <li v-for="item in UsersCommission" :key="item.id" >
-                <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-                    <input :id="`checkbox-item-`+ item.id" type="checkbox" value="" class="w-4 h-4 text-gray-900 bg-gray-100 border-gray-300 rounded focus:ring-black dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" @change="SelectCommission(item, $event.target.checked)">
-                    <label :for="`checkbox-item-`+ item.id" class="w-full ms-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">{{item.user_name}}</label>
-                </div>
-            </li>
-        </ul>
-        <a href="#" class="flex items-center p-3 text-sm font-medium text-red-600 border-t border-gray-200 rounded-b-lg bg-gray-50 dark:border-gray-600 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-red-500 hover:underline">
-            <svg class="w-4 h-4 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
-                <path d="M6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Zm11-3h-6a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2Z"/>
-            </svg>
-            Удалить
-        </a>
-    </div>
-
     <div id="AddQuestionStudents" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
         <div class="relative p-4 w-full max-w-2xl max-h-full">
             <!-- Modal content -->
@@ -243,15 +225,26 @@
             </div>
         </div>
     </div>
+    <div v-if=" this.message != '' "  id="error" class="flex items-center p-4 mb-4 text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 absolute right-0 bottom-0 w-52" role="alert">
+        <svg class="flex-shrink-0 w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+        </svg>
+        <span class="sr-only">Info</span>
+        <div class="ms-3 text-sm font-medium">
+        {{ this.message }}
+        </div>
+    </div>
 </template>
 
 <script>
 import { Modal } from 'flowbite';
 import FileServices from '../services/file.service';
 import UserService from '../services/user.service';
+
 export default{
     data() {
         return {
+            adminUser: null,
             selectFile: null,
             selectFileDownload: null,
             selectNamePred: null,
@@ -270,7 +263,8 @@ export default{
             estimatesVKR_Title: '',
             estimatesDip: '',
             count: 0,
-            wigth: '0%'
+            wigth: '0%',
+            message: ''
         }
     },
     mounted() {
@@ -282,6 +276,11 @@ export default{
         UserService.getUserCommission().then(
             (response) => {
                 this.UsersCommission = response.data.users_commission;
+            }
+        );
+        UserService.getUserBoard().then(
+            response => {
+                this.adminUser = response.data.users[0].id_userbd;
             }
         );
     },
@@ -305,13 +304,26 @@ export default{
                         const $targetEl = document.getElementById("AddFileStudents");
                         const modal = new Modal($targetEl);
                         modal.hide();
+                        FileServices.getfilelist().then(
+                            response => {
+                                this.filelist = response.data.file_list;
+                            }
+                        );
                     }
                 }
             );
         },
         GetInfoFromFile(item){
+            this.wigth = "0%";
             this.selectFileDownload = null;
+            this.questions = [];
+            this.selectedItemDetails = null;
             this.selectFileDownload = item;
+            FileServices.getdatefromfile(item).then(
+                response => {
+                    document.getElementById('datepicker').value = response.date_start;
+                }
+            );
             FileServices.getinfofromfile(item).then(
                 response => {
                     this.students = response.students;
@@ -349,6 +361,11 @@ export default{
                 this.estimatesVKR_Title = '';
             } else {
                 this.selectedItemDetails = item;
+                this.questions = [];
+                this.estimates = [];
+                this.estimates_dip = [];
+                this.estimatesVKR = '';
+                this.estimatesVKR_Title = '';
                 FileServices.getquestioncommission(item).then(
                     response => {
                         this.questions = response.questions;
@@ -383,6 +400,11 @@ export default{
                             }
                         }
                     )
+                );
+                FileServices.getdatefromfile(this.selectFileDownload).then(
+                    response => {
+                        document.getElementById('datepicker_end').value = response.date_end;
+                    }
                 );
             }
         },
@@ -453,17 +475,34 @@ export default{
         },
         DownloadDOCX(){
             this.selectedDate = document.getElementById('datepicker').value;
+            let filteredUsersCommission;
+            if (this.selectNamePred !== null) {
+                filteredUsersCommission = this.UsersCommission.filter(user => {
+                    return !this.selectNamePred.includes(user.user_name);
+                });
+            } else {
+                filteredUsersCommission = this.UsersCommission;
+            }
             let formData = {
+                userbd: this.adminUser,
                 fileID: this.selectFileDownload.id,
                 date: this.selectedDate,
                 namepred: this.selectNamePred,
-                userscommission: this.UsersCommission
+                userscommission: filteredUsersCommission
             }
             this.$store.dispatch('file/downloadfile', formData).then(
                 response => {
-                    console.log(response);
+                    if (response.status == 'success'){
+                        location.href = 'http://127.0.0.1:83/downloadfile?id=' + this.selectFileDownload.id;
+                    }
+                },
+                (error) => {
+                    this.message = 'Проверьте, заполнено ли поле "Председатель ГЭК"';
+                    setTimeout(() => {
+                        this.message = '';
+                    }, 5000);
                 }
-            );
+            )
         }
     }
 }

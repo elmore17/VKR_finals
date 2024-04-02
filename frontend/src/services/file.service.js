@@ -30,6 +30,12 @@ class FileServices{
             return response.data;
         });
     }
+    getdatefromfile({ id }){
+        return api.get('/getdatefromfile?id=' + id)
+        .then(response => {
+            return response.data;
+        });
+    }
     getquestioncommission({ id }){
         return api.get('/questioncommission?id=' + id)
         .then(response =>{
@@ -70,8 +76,9 @@ class FileServices{
             return response.data;
         });
     }
-    downloadfile({fileID, date, namepred, userscommission}){
+    downloadfile({userbd, fileID, date, namepred, userscommission}){
         return api.post('/downloadfile', {
+            userbd,
             fileID,
             date,
             namepred,

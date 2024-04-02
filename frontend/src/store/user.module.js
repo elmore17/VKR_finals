@@ -1,10 +1,10 @@
-import FileServices from "../services/file.service";
+import CommissionService from "../services/commission.service";
 
-export const file = {
+export const user = {
     namespaced: true,
     actions:{
-        uploadfile({ commit }, file){
-            return FileServices.uploadfile(file).then(
+        adduserscommission({ commit }, data){
+            return CommissionService.adduserscommission(data).then(
                 response => {
                     return Promise.resolve(response);
                 },
@@ -13,8 +13,8 @@ export const file = {
                 }
             );
         },
-        addquestioncommission({commit}, data){
-            return FileServices.addquestioncommission(data).then(
+        deluserscommission({ commit }, data){
+            return CommissionService.deluserscommission(data).then(
                 response => {
                     return Promise.resolve(response);
                 },
@@ -23,18 +23,8 @@ export const file = {
                 }
             );
         },
-        updateestimatesuser({commit}, data){
-            return FileServices.updateestimatesuser(data).then(
-                response => {
-                    return Promise.resolve(response);
-                },
-                error => {
-                    return Promise.reject(error);
-                }
-            );
-        },
-        downloadfile({commit}, data){
-            return FileServices.downloadfile(data).then(
+        settingadmin({ commit }, data){
+            return CommissionService.settingadmin(data).then(
                 response => {
                     return Promise.resolve(response);
                 },
@@ -44,4 +34,4 @@ export const file = {
             );
         }
     }
-};
+}

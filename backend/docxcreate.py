@@ -27,7 +27,7 @@ def read_docx(docx_path, items_per_subarray=142):
     return divided_data
 
 # Вставка данных в шаблон
-def create_draft(data, output_docx_path, namepred, userscommission, current_user):
+def create_draft(data, output_docx_path, namepred, userscommission, userbd):
     doc = DocxTemplate('shablon.docx')
     
     combined_doc = Document()
@@ -99,7 +99,7 @@ def create_draft(data, output_docx_path, namepred, userscommission, current_user
             
             context['studentU'] = item[3] 
             
-            cursor.execute('select name from adminbd where user_name = %s',(current_user,)) 
+            cursor.execute('select name from adminbd where id_userbd = %s',(userbd,)) 
             namesekret = cursor.fetchone()
             parts = namesekret[0].split()
             last_name = parts[0]
@@ -112,5 +112,5 @@ def create_draft(data, output_docx_path, namepred, userscommission, current_user
 
         for element in doc.element.body:
             combined_doc.element.body.append(element)
-
+            
     combined_doc.save(output_docx_path)

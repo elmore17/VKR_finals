@@ -185,6 +185,54 @@ def get_users_commission():
             }
             user_list.append(user_dict)
         return make_response(jsonify({'users_commission': user_list}))
+
+@app.route('/delusercommission', methods=['POST'])
+def del_user_commission():
+    if request.method == 'POST':
+        post_data = request.get_json()
+        idUser = post_data.get('id')
+        with get_db_connection() as conn:
+           cursor = conn.cursor()
+           cursor.execute('DELETE FROM protection_issues WHERE id_user_commission = %s', (idUser,))
+           cursor.execute('DELETE FROM users_commission WHERE id_user = %s', (idUser,))
+           conn.commit()
+        return make_response(jsonify({'status': 'success'}), 200)
+    
+@app.route('/settingadmin', methods=['POST'])
+def setting_admin():
+    if request.method == 'POST':
+        post_data = request.get_json()
+        user_name_new = post_data.get('newFIO')
+        user_id_old = post_data.get('idAdmin')
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("UPDATE adminbd SET name = %s WHERE id_userbd = %s", (user_name_new, user_id_old))
+            conn.commit()
+
+        return make_response(jsonify({'status': 'success'}), 200)
+
+@app.route('/adduserscommission', methods=['POST'])
+def add_users_commission():
+    if request.method == 'POST':
+        post_data = request.get_json()
+        user_name = post_data.get('fullname')
+        post = post_data.get('post')
+        date_start = post_data.get('date_start')
+        date_end = post_data.get('date_end')
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+
+            # Проверка наличия пользователя в таблице users_commission
+            cursor.execute('SELECT * FROM users_commission WHERE user_name = %s', (user_name,))
+            existing_user = cursor.fetchone()
+            if existing_user:
+                return make_response(jsonify({'status': 'User already exists'}), 400)
+
+            # Вставка нового пользователя в таблицу users_commission
+            cursor.execute('INSERT INTO users_commission (user_name, post, start_data, end_data) VALUES (%s, %s, %s, %s)', (user_name, post, date_start, date_end))
+            conn.commit()
+
+        return make_response(jsonify({'status': 'success'}), 200)
     
 @app.route('/uploadfile', methods=['POST', 'GET'])
 def upload_file():
@@ -195,17 +243,16 @@ def upload_file():
             downloads_directory = Path.home() / 'Downloads'
             file_path = downloads_directory / uploaded_file.filename
             uploaded_file.save(file_path)
-            # output_json = 'output.json'
             data_text = read_docx(file_path)
-            # create_json(data_text, output_json)
-
+            today = datetime.today()
+            date = today.strftime('%Y-%m-%d')
             #Добавление информиции из docx в базу данных
             with get_db_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute("SELECT id_filepath FROM filepath WHERE filename = %s", (uploaded_file.filename,))
                 existing_filepath = cursor.fetchone()
                 if existing_filepath is None:
-                    cursor.execute("INSERT INTO filepath (filename) VALUES (%s)", (uploaded_file.filename,))
+                    cursor.execute("INSERT INTO filepath (filename, date_create) VALUES (%s, %s)", (uploaded_file.filename, date))
                     conn.commit()
                 for item in data_text:
                     # Проверка наличия направления в таблице direction
@@ -246,6 +293,8 @@ def upload_file():
                     #Таблица для шаблонизации
                     cursor.execute("SELECT id FROM graduate_work WHERE id_student = %s", (existing_student,))
                     existing_graduate_work = cursor.fetchone()
+                    cursor.execute("SELECT id_filepath FROM filepath WHERE filename = %s", (uploaded_file.filename,))
+                    existing_filepath = cursor.fetchone()
                     if existing_graduate_work is None:
                         cursor.execute("INSERT INTO graduate_work (id_student, id_direction, id_scientific_adviser, id_level_education, id_speciality, id_filepath) VALUES (%s, %s, %s, %s, %s, %s)", (existing_student, existing_direction, existing_scientific_adviser, existing_level_education, existing_speciality, existing_filepath))
                         conn.commit()
@@ -263,9 +312,12 @@ def upload_file():
             files = cursor.fetchall()
             file_list = []
             for file in files:
+                date = file[2]
+                date_formatted = date.strftime("%d.%m.%y") if date is not None else ""
                 file_dict = {
                     'id': file[0],
-                    'file_name': file[1]
+                    'file_name': file[1],
+                    'date': date_formatted
                 }
                 file_list.append(file_dict)
             return make_response(jsonify({'file_list': file_list}))
@@ -285,6 +337,19 @@ def get_info_from_file():
             }
             students_list.append(students_dict)
     return make_response(jsonify({'students': students_list}), 200)
+
+@app.route('/getdatefromfile', methods=['GET'])
+def get_date_from_file():
+    id = request.args.get('id')
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('select gw.date_start, gw.date_end from graduate_work gw  where gw.id_filepath = %s', (id,))
+        date = cursor.fetchone()
+        date_start = date[0]
+        date_formatted_start = date_start.strftime("%Y-%m-%d") if date_start is not None else ""
+        date_end = date[1]
+        date_formatted_end = date_end.strftime("%Y-%m-%d") if date_end is not None else ""
+    return make_response(jsonify({'date_start': date_formatted_start, 'date_end': date_formatted_end}), 200)
 
 @app.route('/questioncommission', methods=['GET', 'POST'])
 def question_commission():
@@ -396,27 +461,38 @@ def estimates_dip():
             estimates_list.append(estimates_dict)
     return make_response(jsonify({'estimates': estimates_list}), 200)
 
-@app.route('/downloadfile', methods=['POST'])
-@token_required
-def download_file(current_user):
-    post_data = request.get_json()
-    file_id = post_data.get('fileID')
-    date = post_data.get('date')
-    namepred = post_data.get('namepred')
-    userscommission = post_data.get('userscommission')
-    if date == '':
-        today = datetime.today()
-        date = today.strftime('%Y-%m-%d')
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("UPDATE graduate_work SET date_start = %s WHERE id_filepath = %s", (date, file_id))
-        conn.commit()
-        cursor.execute("select gw.date_start ,d.name_direction, s.id, s.name, s.title_gradual_work, sa.name_adviser, sa.role, le.name_level_education, s2.name_speciality  from graduate_work gw, direction d, students s, scientific_adviser sa, level_education le, speciality s2 where gw.id_filepath = %s and gw.id_student = s.id and gw.id_scientific_adviser = sa.id and le.id = gw.id_level_education and s2.id = gw.id_speciality", (file_id,))
-        info = cursor.fetchall()
-    output_path = 'combined_generated_docx.docx'
-    create_draft(info, output_path, namepred, userscommission, current_user)
-    
-    return make_response(jsonify({'date': date}), 200)
+@app.route('/downloadfile', methods=['POST', 'GET'])
+def download_file():
+    if request.method == 'POST':
+        post_data = request.get_json()
+        userbd = post_data.get('userbd')
+        file_id = post_data.get('fileID')
+        date = post_data.get('date')
+        namepred = post_data.get('namepred')
+        userscommission = post_data.get('userscommission')
+        if date == '':
+            today = datetime.today()
+            date = today.strftime('%Y-%m-%d')
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("UPDATE graduate_work SET date_start = %s WHERE id_filepath = %s", (date, file_id))
+            conn.commit()
+            cursor.execute("select gw.date_start ,d.name_direction, s.id, s.name, s.title_gradual_work, sa.name_adviser, sa.role, le.name_level_education, s2.name_speciality  from graduate_work gw, direction d, students s, scientific_adviser sa, level_education le, speciality s2 where gw.id_filepath = %s and gw.id_student = s.id and gw.id_scientific_adviser = sa.id and le.id = gw.id_level_education and s2.id = gw.id_speciality", (file_id,))
+            info = cursor.fetchall()
+        output_path = f'Готовый_протокол_{file_id}.docx'
+        create_draft(info, output_path, namepred, userscommission, userbd)
+        return make_response(jsonify({'status':'success'}))
+    if request.method == 'GET':
+        file_id = request.args.get('id')
+        output_path = f'Готовый_протокол_{file_id}.docx'
+        if output_path:
+            return send_file(
+                f'/Users/danilegorkin/Documents/VKR/{output_path}', as_attachment=True
+            )
+        else:
+            return make_response(jsonify({'error': 'output_path is missing'}), 400)
+        
+
     
 
 
