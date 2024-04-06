@@ -1,7 +1,7 @@
 import api from "./api";
 
-class CommissionService{
-    adduserscommission({fullname, post, date_start, date_end}){
+class CommissionService {
+    adduserscommission({ fullname, post, date_start, date_end }) {
         return api.post('/adduserscommission', {
             fullname,
             post,
@@ -13,7 +13,7 @@ class CommissionService{
             }
         );
     }
-    deluserscommission({id}){
+    deluserscommission({ id }) {
         return api.post('/delusercommission', {
             id
         }).then(
@@ -22,8 +22,8 @@ class CommissionService{
             }
         )
     }
-    settingadmin({newFIO, idAdmin}){
-        return api.post('/settingadmin',{
+    settingadmin({ newFIO, idAdmin }) {
+        return api.post('/settingadmin', {
             newFIO,
             idAdmin
         }).then(

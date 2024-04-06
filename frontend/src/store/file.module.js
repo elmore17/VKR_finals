@@ -2,8 +2,8 @@ import FileServices from "../services/file.service";
 
 export const file = {
     namespaced: true,
-    actions:{
-        uploadfile({ commit }, file){
+    actions: {
+        uploadfile({ commit }, file) {
             return FileServices.uploadfile(file).then(
                 response => {
                     return Promise.resolve(response);
@@ -13,7 +13,7 @@ export const file = {
                 }
             );
         },
-        addquestioncommission({commit}, data){
+        addquestioncommission({ commit }, data) {
             return FileServices.addquestioncommission(data).then(
                 response => {
                     return Promise.resolve(response);
@@ -23,7 +23,7 @@ export const file = {
                 }
             );
         },
-        updateestimatesuser({commit}, data){
+        updateestimatesuser({ commit }, data) {
             return FileServices.updateestimatesuser(data).then(
                 response => {
                     return Promise.resolve(response);
@@ -33,8 +33,18 @@ export const file = {
                 }
             );
         },
-        downloadfile({commit}, data){
+        downloadfile({ commit }, data) {
             return FileServices.downloadfile(data).then(
+                response => {
+                    return Promise.resolve(response);
+                },
+                error => {
+                    return Promise.reject(error);
+                }
+            );
+        },
+        addquestion({ commit }, data) {
+            return FileServices.addquestion(data).then(
                 response => {
                     return Promise.resolve(response);
                 },

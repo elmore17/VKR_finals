@@ -7,6 +7,7 @@ from functools import wraps
 from datetime import datetime, timedelta
 from pathlib import Path
 from docxcreate import read_docx, create_draft
+from collections import defaultdict
 # instantiate the app
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -167,6 +168,8 @@ def registration():
                         403,
                         {'WWW-Authenticate' : 'Password !!!!"'}
                     )
+
+#Заседание ГЭК
 
 @app.route('/getuserscommission', methods=['GET'])
 def get_users_commission():
@@ -494,8 +497,107 @@ def download_file():
         
 
     
+#Заседание кафедры /////////
+
+@app.route('/addpps', methods=['POST', 'GET'])
+def add_pps():
+    if request.method == 'POST':
+        post_data = request.get_json()
+        name = post_data.get('name')
+        departament = post_data.get('departament')
+        post = post_data.get('post')
+        academic_title = post_data.get('academic_title')
+        degree = post_data.get('degree')
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT id FROM pps WHERE name = %s', (name,))
+            existing_user = cursor.fetchone()
+            if existing_user:
+                return make_response(jsonify({'status': 'User already exists'}), 400)
+            cursor.execute('SELECT id FROM departament WHERE name = %s', (departament,))
+            existing_departament = cursor.fetchone()
+            if existing_departament is None:
+                cursor.execute("INSERT INTO departament (name) VALUES (%s)", (departament,))
+                conn.commit()
+                cursor.execute('SELECT id FROM departament WHERE name = %s', (departament,))
+                existing_departament = cursor.fetchone()
+            cursor.execute('SELECT id FROM role WHERE name = %s', (post,))
+            existing_role = cursor.fetchone()
+            if existing_role is None:
+                cursor.execute("INSERT INTO role (name) VALUES (%s)", (post,))
+                conn.commit()
+                cursor.execute('SELECT id FROM role WHERE name = %s', (post,))
+                existing_role = cursor.fetchone()
+            cursor.execute('SELECT id FROM academic_title WHERE name = %s', (academic_title,))
+            existing_academic_title = cursor.fetchone()
+            if existing_academic_title is None:
+                cursor.execute("INSERT INTO academic_title (name) VALUES (%s)", (academic_title,))
+                conn.commit()
+                cursor.execute('SELECT id FROM academic_title WHERE name = %s', (academic_title,))
+                existing_academic_title = cursor.fetchone()
+            cursor.execute("INSERT INTO pps (name, id_role, id_academic_title, departament, degree) VALUES (%s, %s, %s, %s, %s)", (name, existing_role[0], existing_academic_title[0],existing_departament[0],degree))
+            conn.commit()
+        return make_response(jsonify({'status': 'success'}))
+    if request.method == 'GET':
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('select p.id, p.name, r.name, at2.name, d.name, p.degree from pps p, role r, academic_title at2, departament d where p.id_role = r.id and p.id_academic_title = at2.id and p.departament = d.id')
+            pps_users = cursor.fetchall()
+            pps_list = []
+            for user in pps_users:
+                pps_dict = {
+                    'id': user[0],
+                    'name': user[1],
+                    'role': user[2],
+                    'academic_title': user[3],
+                    'departament': user[4],
+                    'degree': user[5]
+                }
+                pps_list.append(pps_dict)
+    return make_response(jsonify({'pps': pps_list}), 200)
+
+@app.route('/deluserpps', methods=['POST'])
+def del_user_pps():
+    if request.method == 'POST':
+        post_data = request.get_json()
+        idUser = post_data.get('id')
+        with get_db_connection() as conn:
+           cursor = conn.cursor()
+           cursor.execute('DELETE FROM pps WHERE id = %s', (idUser,))
+           conn.commit()
+        return make_response(jsonify({'status': 'success'}), 200)
+    
+@app.route('/addquestion', methods=['POST', 'GET'])
+def add_question_kaf():
+    if request.method == 'POST':
+        post_data = request.get_json()
+        month = post_data.get('month')
+        question = post_data.get('question')
+        with get_db_connection() as conn:
+           cursor = conn.cursor()
+           cursor.execute('SELECT id FROM questions WHERE name = %s', (question,))
+           existing_question = cursor.fetchone()
+           if existing_question is None:
+                cursor.execute("INSERT INTO questions (name, month) VALUES (%s, %s)", (question, month))
+                conn.commit()   
+        return make_response(jsonify({'status': 'success'}), 200)
+    if request.method == 'GET':
+        with get_db_connection() as conn:
+           cursor = conn.cursor()
+           cursor.execute('SELECT * FROM questions')
+           questions = cursor.fetchall()
+           grouped_questions = defaultdict(list)
+
+           for question in questions:
+               month_name = question[2]
+               question_dict = {
+                   'id': question[0],
+                   'name': question[1]
+                   
+               }
+               grouped_questions[month_name].append(question_dict)
+               grouped_questions_list = [(month, grouped_questions[month]) for month in grouped_questions]
+    return make_response(jsonify({'question': grouped_questions_list}), 200)
 
 
-
-            
 app.run(host='0.0.0.0', port=83)

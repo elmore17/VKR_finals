@@ -1,9 +1,10 @@
 import CommissionService from "../services/commission.service";
+import ppsService from "../services/pps.service";
 
 export const user = {
     namespaced: true,
-    actions:{
-        adduserscommission({ commit }, data){
+    actions: {
+        adduserscommission({ commit }, data) {
             return CommissionService.adduserscommission(data).then(
                 response => {
                     return Promise.resolve(response);
@@ -13,7 +14,7 @@ export const user = {
                 }
             );
         },
-        deluserscommission({ commit }, data){
+        deluserscommission({ commit }, data) {
             return CommissionService.deluserscommission(data).then(
                 response => {
                     return Promise.resolve(response);
@@ -23,7 +24,7 @@ export const user = {
                 }
             );
         },
-        settingadmin({ commit }, data){
+        settingadmin({ commit }, data) {
             return CommissionService.settingadmin(data).then(
                 response => {
                     return Promise.resolve(response);
@@ -32,6 +33,26 @@ export const user = {
                     return Promise.reject(error);
                 }
             );
-        }
+        },
+        addpps({ commit }, data) {
+            return ppsService.addpps(data).then(
+                response => {
+                    return Promise.resolve(response);
+                },
+                error => {
+                    return Promise.reject(error);
+                }
+            );
+        },
+        deluserspps({ commit }, data) {
+            return ppsService.deluserspps(data).then(
+                response => {
+                    return Promise.resolve(response);
+                },
+                error => {
+                    return Promise.reject(error);
+                }
+            );
+        },
     }
 }
