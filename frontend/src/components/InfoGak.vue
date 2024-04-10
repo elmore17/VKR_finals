@@ -74,7 +74,7 @@
                     </div>
                 </div>
             </div>
-            <div v-if="selectedItemDetails != null" class="grid grid-cols-3 mt-5 gap-5 max-w-3xl">
+            <div v-if="selectedItemDetails != null" class="grid grid-cols-2 mt-5 gap-5 max-w-3xl">
                 <div class="mt-5">
                     <div class="border max-w-96 h-28 pl-5 pt-5 rounded-t-xl colorboxinfo">
                         <p class="text-white font-medium text-lg pb-2">Оценка за ВКР</p>
@@ -109,7 +109,7 @@
                 </div>
                 <div class="mt-5">
                     <div class="border max-w-96 h-28 pl-5 pt-5 rounded-t-xl colorboxinfo">
-                        <p class="text-white font-medium text-lg pb-2">Дата окончания</p>
+                        <p class="text-white font-medium text-lg pb-2">Дата присвоения квалификации</p>
                         <div class="relative max-w-sm">
                             <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                                 <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
@@ -133,7 +133,7 @@
 
         <!-- block for student and document -->
         <div>
-            <div class="h-44">
+            <div class="h-44 overflow-auto">
                 <p class="text-white font-medium text-lg pb-2 text-start">Добавленные протоколы</p>
                 <div v-for="item in filelist" :key="item.id" class="flex flex-row" v-on:click="GetInfoFromFile(item)">
                     <div class="flex flex-row mr-auto cursor-pointer">

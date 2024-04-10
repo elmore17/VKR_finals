@@ -42,6 +42,12 @@ onMounted(() => {
                             class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer">Повестка
                             заседания</a>
                     </li>
+                    <li>
+                        <a data-modal-target="ListTextDrafts" data-modal-toggle="ListTextDrafts"
+                            class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer"
+                            @click='updatelist'>Шаблоны
+                            текстов</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -77,6 +83,9 @@ onMounted(() => {
         </div>
     </nav>
 
+
+
+    <!-- Modal window -->
     <div id="settings" tabindex="-1" aria-hidden="true"
         class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
         <div class="relative p-4 w-full max-w-2xl max-h-full">
@@ -260,7 +269,66 @@ onMounted(() => {
         </div>
     </div>
 
+    <div id="ListTextDrafts" tabindex="-1" aria-hidden="true"
+        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-full max-w-2xl max-h-full">
+            <!-- Modal content -->
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <!-- Modal header -->
+                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                        Текстовые шаблоны
+                    </h3>
+                    <button type="button"
+                        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                        data-modal-hide="ListTextDrafts">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                        </svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+                <!-- Modal body -->
+                <div class="p-4 md:p-5 space-y-4 max-h-96 overflow-auto">
+                    <button data-modal-hide="ListTextDrafts" data-modal-target="AddListDraftText"
+                        data-modal-toggle="AddListDraftText"
+                        class="text-white tbg focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Добавить</button>
+                    <div v-for="items in draftsList" :key="items[0]"
+                        class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                        <h1 class="text-center pb-1">{{ items[0] }}</h1>
+                        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                            <thead
+                                class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">
+                                        Содержание текста
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
 
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="item in items[1]" :key="item.id"
+                                    class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                                    <th scope="row"
+                                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                        {{ item.text }}
+                                    </th>
+                                    <td class="px-6 py-4">
+                                        <a class="font-medium text-black cursor-pointer"
+                                            @click="deldraft(item)">Удалить</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     <div id="AddListQuestion" tabindex="-1" aria-hidden="true"
@@ -300,6 +368,52 @@ onMounted(() => {
                         class="text-white tbg focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                         @click="addquestion">Принять</button>
                     <button data-modal-hide="AddListQuestion" type="button"
+                        class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100  focus:z-10 focus:ring-4 focus:ring-gray-100">Отмена</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="AddListDraftText" tabindex="-1" aria-hidden="true"
+        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-auto max-w-full max-h-full">
+            <!-- Modal content -->
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <!-- Modal header -->
+                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                        Форма добавления
+                    </h3>
+                    <button type="button"
+                        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                        data-modal-hide="AddListDraftText">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                        </svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+                <!-- Modal body -->
+                <div class="p-4 md:p-5 space-y-4">
+                    <div class="">
+                        <select v-model="namedraft" id="namedraft"
+                            class="bg-white border-dashed text-sm rounded-3xl block w-44 ps-3 p-2.5 border-collapse">
+                            <option v-for="item in namedraft_array" :key="item.id" :value="item.id">{{ item.name }}
+                            </option>
+                        </select>
+                    </div>
+                    <textarea v-model="textdrafts"
+                        class="resize rounded-md mt-1 mb-6 font-sans w-80 border-none bg-gray-100 p-3"
+                        placeholder="Введите новый текст"></textarea>
+                </div>
+                <!-- Modal footer -->
+                <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                    <button data-modal-hide="AddListDraftText" type="button"
+                        class="text-white tbg focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                        @click="addtextdraft">Принять</button>
+                    <button data-modal-hide="AddListDraftText" type="button"
                         class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100  focus:z-10 focus:ring-4 focus:ring-gray-100">Отмена</button>
                 </div>
             </div>
@@ -404,8 +518,11 @@ export default {
                 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
             ],
             question: '',
-            questionList: null
-
+            questionList: null,
+            namedraft: '',
+            namedraft_array: null,
+            textdrafts: '',
+            draftsList: null
         };
     },
     computed: {
@@ -430,11 +547,6 @@ export default {
                     EventBus.dispatch("logout");
                 }
             });
-        UserService.getUserCommission().then(
-            (response) => {
-                this.UsersCommission = response.data.users_commission;
-            }
-        );
         PPS.getpps().then(
             response => {
                 this.UsersPPS = response.data.pps;
@@ -448,6 +560,16 @@ export default {
         EventBus.on("logout", () => {
             this.logOut();
         });
+        FileServices.getnamedrafts().then(
+            response => {
+                this.namedraft_array = response.data.name_drafts;
+            }
+        );
+        FileServices.getdrafts().then(
+            response => {
+                this.draftsList = response.data.draft;
+            }
+        );
     },
     methods: {
         logOut() {
@@ -568,6 +690,70 @@ export default {
                     this.message = '';
                 }, 5000);
             }
+        },
+        addtextdraft() {
+            if (this.namedraft != '' && this.textdrafts != '') {
+                let formData = {
+                    id_name: this.namedraft,
+                    text_draft: this.textdrafts
+                }
+                this.$store.dispatch('file/adddrafts', formData).then(
+                    response => {
+                        if (response.status == 'success') {
+                            FileServices.getdrafts().then(
+                                response => {
+                                    this.draftsList = response.data.draft;
+                                }
+                            );
+                        }
+                    }
+                );
+            } else {
+                this.message = 'Данные не заполнены или заполнены неверно';
+                setTimeout(() => {
+                    this.message = '';
+                }, 5000);
+            }
+
+        },
+        deldraft(item) {
+            let formData = {
+                id: item.id
+            };
+            this.$store.dispatch('file/deldraft', formData).then(
+                response => {
+                    if (response.status == 'success') {
+                        FileServices.getdrafts().then(
+                            response => {
+                                this.draftsList = response.data.draft;
+                            }
+                        );
+                    }
+                }
+            )
+        },
+        delquestions(item) {
+            let formData = {
+                id: item.id
+            };
+            this.$store.dispatch('file/delquestion', formData).then(
+                response => {
+                    if (response.status == 'success') {
+                        FileServices.getquestion().then(
+                            response => {
+                                this.questionList = response.data.question;
+                            }
+                        );
+                    }
+                }
+            );
+        },
+        updatelist() {
+            FileServices.getdrafts().then(
+                response => {
+                    this.draftsList = response.data.draft;
+                }
+            );
         }
     },
     beforeDestroy() {

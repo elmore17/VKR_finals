@@ -24,6 +24,9 @@ class FileServices {
     getestimatesdip() {
         return api.get('/get_estimatesdip');
     }
+    getnamedrafts() {
+        return api.get('/namedrafts');
+    }
     getinfofromfile({ id }) {
         return api.get('/getinfofromfile?id=' + id)
             .then(response => {
@@ -99,8 +102,52 @@ class FileServices {
             }
         );
     }
-    getquestion(){
+    getquestion() {
         return api.get('/addquestion');
+    }
+    delquestion({ id }) {
+        return api.post('/delquestion', {
+            id
+        }).then(
+            response => {
+                return response.data;
+            }
+        );
+    }
+    adddrafts({ id_name, text_draft }) {
+        return api.post('/adddrafts', {
+            id_name,
+            text_draft
+        }).then(
+            response => {
+                return response.data;
+            }
+        );
+    }
+    getdrafts() {
+        return api.get('/adddrafts');
+    }
+    deldraft({ id }) {
+        return api.post('/deldraft', {
+            id
+        }).then(
+            response => {
+                return response.data;
+            }
+        );
+    }
+    adddraftfile({ data, pred, adminuser, file_name, json }) {
+        return api.post('/adddraftfile', {
+            data,
+            pred,
+            adminuser,
+            file_name,
+            json
+        }).then(
+            response => {
+                return response.data;
+            }
+        );
     }
 }
 

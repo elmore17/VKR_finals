@@ -599,5 +599,90 @@ def add_question_kaf():
                grouped_questions_list = [(month, grouped_questions[month]) for month in grouped_questions]
     return make_response(jsonify({'question': grouped_questions_list}), 200)
 
+@app.route('/delquestion', methods=['POST'])
+def del_question():
+    if request.method == 'POST':
+        post_data = request.get_json()
+        id_question = post_data.get('id')
+        with get_db_connection() as conn:
+           cursor = conn.cursor()
+           cursor.execute('DELETE FROM questions WHERE id = %s', (id_question,))
+           conn.commit()
+        return make_response(jsonify({'status': 'success'}), 200)
+
+@app.route('/namedrafts', methods=['GET'])
+def get_name_drafts():
+    with get_db_connection() as conn:
+           cursor = conn.cursor()
+           cursor.execute('SELECT * FROM name_drafts')
+           name_drafts = cursor.fetchall()
+           name_drafts_list = []
+           for draft in name_drafts:
+                draft_dict = {
+                    'id': draft[0],
+                    'name': draft[1]
+                }
+                name_drafts_list.append(draft_dict)
+    return make_response(jsonify({'name_drafts': name_drafts_list}), 200)
+
+@app.route('/adddrafts', methods=['POST','GET'])
+def drafts():
+    if request.method == 'POST':
+        post_data = request.get_json()
+        id_name = post_data.get('id_name')
+        text_drafts = post_data.get('text_draft')
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT id FROM drafts d WHERE d.text = %s', (text_drafts,))
+            execute_id_drafts = cursor.fetchone()
+            if execute_id_drafts is None:
+                cursor.execute('INSERT INTO drafts (id_name, text) VALUES (%s, %s)', (id_name, text_drafts))
+                conn.commit()
+        return make_response(jsonify({'status': 'success'}), 200)
+    if request.method == 'GET':
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('select d.id ,nd.name, d.text from drafts d, name_drafts nd where d.id_name  = nd.id')
+            drafts = cursor.fetchall()
+            grouped_drafts = defaultdict(list)
+            for item in drafts:
+               item_name = item[1]
+               draft_dict = {
+                   'id': item[0],
+                   'text': item[2]
+                   
+               }
+               grouped_drafts[item_name].append(draft_dict)
+               grouped_draft_list = [(month, grouped_drafts[month]) for month in grouped_drafts]
+        return make_response(jsonify({'draft': grouped_draft_list}), 200)
+
+@app.route('/deldraft', methods=['POST'])
+def del_draft():
+    if request.method == 'POST':
+        post_data = request.get_json()
+        id_draft = post_data.get('id')
+        with get_db_connection() as conn:
+           cursor = conn.cursor()
+           cursor.execute('DELETE FROM drafts WHERE id = %s', (id_draft,))
+           conn.commit()
+        return make_response(jsonify({'status': 'success'}), 200)
+    
+@app.route('/adddraftfile', methods=['POST', 'GET'])
+def add_draft_file():
+    if request.method == 'POST':
+        post_data = request.get_json()
+        data = post_data.get('data')
+        pred = post_data.get('pred')
+        adminuser = post_data.get('adminuser')
+        file_name = post_data.get('file_name')
+        json = post_data.get('json')
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT id FROM drafts_file WHERE name = %s', (file_name,))
+            execute_file = cursor.fetchone()
+            if execute_file is None:
+                cursor.execute('INSERT INTO drafts_file (name, text, data, admin_name, chairperson) VALUES (%s, %s, %s, %s, %s)', (file_name, str(json), data, adminuser, pred))
+                conn.commit()
+        return make_response(jsonify({'status': 'success'}), 200)
 
 app.run(host='0.0.0.0', port=83)

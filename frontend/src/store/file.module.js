@@ -52,6 +52,46 @@ export const file = {
                     return Promise.reject(error);
                 }
             );
+        },
+        adddrafts({ commit }, data) {
+            return FileServices.adddrafts(data).then(
+                response => {
+                    return Promise.resolve(response);
+                },
+                error => {
+                    return Promise.reject(error);
+                }
+            );
+        },
+        deldraft({ commit }, data) {
+            return FileServices.deldraft(data).then(
+                response => {
+                    return Promise.resolve(response);
+                },
+                error => {
+                    return Promise.reject(error);
+                }
+            );
+        },
+        delquestion({ commit }, data) {
+            return FileServices.delquestion(data).then(
+                response => {
+                    return Promise.resolve(response);
+                },
+                error => {
+                    return Promise.reject(error);
+                }
+            );
+        },
+        adddraftfile({ commit }, data) {
+            return FileServices.adddraftfile(data).then(
+                response => {
+                    return Promise.resolve(response);
+                },
+                error => {
+                    return Promise.reject(error);
+                }
+            );
         }
     }
 };
