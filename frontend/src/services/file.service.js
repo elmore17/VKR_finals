@@ -136,18 +136,41 @@ class FileServices {
             }
         );
     }
-    adddraftfile({ data, pred, adminuser, file_name, json }) {
+    adddraftfile({ data, pred, adminuser, file_name, json, checkedItems }) {
         return api.post('/adddraftfile', {
             data,
             pred,
             adminuser,
             file_name,
-            json
+            json,
+            checkedItems
         }).then(
             response => {
                 return response.data;
             }
         );
+    }
+    getdraftsfile() {
+        return api.get('/adddraftfile');
+    }
+    getdraftsfileinfo({ id }) {
+        return api.get('/draftsfileinfo?id=' + id)
+            .then(response => {
+                return response.data;
+            });
+    }
+    downloadfileZK({ data, pred, json, adminuser, pps, checkedItems }) {
+        return api.post('/downloadfileZK', {
+            data,
+            pred,
+            json,
+            adminuser,
+            pps,
+            checkedItems
+        }).then(
+            response => {
+                return response.data;
+            });
     }
 }
 

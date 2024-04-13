@@ -82,9 +82,9 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                         </svg>
-                        <p class="text-white">{{ item.file_name }}</p>
+                        <p class="text-white">{{ item.name }}</p>
                     </div>
-                    <p style="color: #71717A;">{{ item.date }}</p>
+                    <p style="color: #71717A;">{{ item.data }}</p>
                 </div>
             </div>
             <div class="border" style="border-color: #71717A;"></div>
@@ -92,10 +92,11 @@
                 <p class="text-white font-medium text-lg pb-2 text-start">Действия</p>
                 <button data-modal-target="popup-modal" data-modal-toggle="popup-modal"
                     class="tbg px-2 mt-2 w-full rounded-sm">Сохранить шаблон</button>
+                <button v-if="downloadFileId != ''" class="tbg px-2 mt-2 w-full rounded-sm"
+                    @click="DownloadFileKZ()">Скачать документ</button>
             </div>
         </div>
     </div>
-
 
     <div id="popup-modal" tabindex="-1"
         class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
@@ -265,7 +266,9 @@ export default {
             exempletext: null,
             showDropdown: false,
             currentDate: '',
-            adminUser: ''
+            adminUser: '',
+            filenamedownload: '',
+            downloadFileId: ''
         }
     },
     mounted() {
@@ -293,6 +296,12 @@ export default {
         UserService.getUserBoard().then(
             response => {
                 this.adminUser = response.data.users[0].id_userbd;
+            }
+        );
+
+        FileServices.getdraftsfile().then(
+            response => {
+                this.filelist = response.data.file;
             }
         );
 
@@ -415,11 +424,18 @@ export default {
                     pred: this.selectName,
                     adminuser: this.adminUser,
                     file_name: this.filename,
-                    json: this.json
+                    json: JSON.stringify(this.json),
+                    checkedItems: JSON.stringify(this.checkedItems)
                 }
                 this.$store.dispatch('file/adddraftfile', formData).then(
                     response => {
-                        console.log(response)
+                        if (response.status == 'success') {
+                            FileServices.getdraftsfile().then(
+                                response => {
+                                    this.filelist = response.data.file;
+                                }
+                            );
+                        }
                     }
                 );
             }
@@ -441,6 +457,35 @@ export default {
         setText(text) {
             this.textdrafts = text;
             this.showDropdown = false;
+        },
+        GetInfoFromFileZK(item) {
+            this.downloadFileId = item.id;
+            FileServices.getdraftsfileinfo(item).then(
+                response => {
+                    this.currentDate = response.file.data;
+                    this.selectName = response.file.chairperson;
+                    this.json = JSON.parse(JSON.parse(response.file.text));
+                    this.checkedItems = JSON.parse(response.file.checkedItems)
+                    this.filename = response.file.name;
+                    this.score = this.json.length;
+                    this.score_title = this.json.length;
+                }
+            );
+        },
+        DownloadFileKZ() {
+            let formData = {
+                data: this.currentDate,
+                pred: this.selectName,
+                json: this.json,
+                adminuser: this.adminUser,
+                pps: this.UsersPPS,
+                checkedItems: this.checkedItems
+            }
+            this.$store.dispatch('file/downloadfileZK', formData).then(
+                response => {
+                    console.log(response)
+                }
+            );
         }
     }
 }

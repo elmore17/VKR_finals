@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from docxcreate import read_docx, create_draft
 from collections import defaultdict
+import json
 # instantiate the app
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -675,14 +676,64 @@ def add_draft_file():
         pred = post_data.get('pred')
         adminuser = post_data.get('adminuser')
         file_name = post_data.get('file_name')
+        checkedItems = post_data.get('checkedItems')
         json = post_data.get('json')
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT id FROM drafts_file WHERE name = %s', (file_name,))
             execute_file = cursor.fetchone()
             if execute_file is None:
-                cursor.execute('INSERT INTO drafts_file (name, text, data, admin_name, chairperson) VALUES (%s, %s, %s, %s, %s)', (file_name, str(json), data, adminuser, pred))
+                cursor.execute('INSERT INTO drafts_file (name, text, data, admin_name, chairperson, checkedItems) VALUES (%s, %s, %s, %s, %s, %s)', (file_name, json, data, adminuser, pred, checkedItems))
+                conn.commit()
+            elif execute_file:
+                cursor.execute("UPDATE drafts_file SET text = %s, checkedItems = %s WHERE name = %s", (json, checkedItems, file_name))
                 conn.commit()
         return make_response(jsonify({'status': 'success'}), 200)
+    if request.method == 'GET':
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT id, name, data FROM drafts_file')
+            execute_file = cursor.fetchall()
+            list_file_drafts = []
+            for item in execute_file:
+                date = item[2]
+                date_formatted = date.strftime("%d.%m.%y") if date is not None else ""
+                file_dict = {
+                    'id': item[0],
+                    'name': item[1],
+                    'data': date_formatted
+                }
+                list_file_drafts.append(file_dict)
+        return make_response(jsonify({'file': list_file_drafts}), 200)
+
+@app.route('/draftsfileinfo', methods=['GET'])
+def drafts_file_info():
+    id = request.args.get('id')
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT data, text, chairperson, checkedItems, name FROM drafts_file WHERE id = %s', (id,))
+        execute_info = cursor.fetchone()
+        date = execute_info[0]
+        date_formatted = date.strftime("%Y-%m-%d") if date is not None else ""
+        json_string = json.dumps(execute_info[1], ensure_ascii=False)
+        file_dict = {
+            'text': json_string,
+            'chairperson': execute_info[2],
+            'data': date_formatted,
+            'checkedItems': execute_info[3],
+            'name': execute_info[4]
+        }
+        return make_response(jsonify({'file': file_dict}), 200)
+    
+@app.route('/downloadfileZK', methods=['POST', 'GET'])
+def download_file_ZK():
+    if request.method == 'POST':
+        post_data = request.get_json()
+        data = post_data.get('data')
+        pred = post_data.get('pred')
+        json = post_data.get('json')
+        adminuser = post_data.get('adminuser')
+        pps = post_data.get('pps')
+        checkedItems = post_data.get('checkedItems')
 
 app.run(host='0.0.0.0', port=83)

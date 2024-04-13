@@ -92,6 +92,16 @@ export const file = {
                     return Promise.reject(error);
                 }
             );
+        },
+        downloadfileZK({ commit }, data) {
+            return FileServices.downloadfile(data).then(
+                response => {
+                    return Promise.resolve(response);
+                },
+                error => {
+                    return Promise.reject(error);
+                }
+            );
         }
     }
 };
