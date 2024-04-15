@@ -60,8 +60,9 @@
                         </ul>
                     </div>
                     <div class="border h-auto pl-5 pt-3 rounded-b-xl colorboxbottom overflow-x-auto">
-                        <div v-for="item in json" class="cursor-pointer hover:font-extralight"
-                            @click="updatedraft(item)">
+                        <div v-for="item in json" :data-modal-target="'popup-modal-update' + json.indexOf(item)"
+                            :data-modal-toggle="'popup-modal-update' + json.indexOf(item)"
+                            class="cursor-pointer hover:font-extralight" @click="updatedraft(item)">
                             <p :key="item.id" class="cursordrop text-2xl mr-1">{{ item.title }} {{ item.key }}</p>
                         </div>
                         <button data-modal-target="AddDraft" data-modal-toggle="AddDraft"
@@ -91,7 +92,7 @@
             <div class="mt-10 border rounded-xl px-5 py-4 colorboxinfo" style="border-color: #71717A;">
                 <p class="text-white font-medium text-lg pb-2 text-start">Действия</p>
                 <button data-modal-target="popup-modal" data-modal-toggle="popup-modal"
-                    class="tbg px-2 mt-2 w-full rounded-sm">Сохранить шаблон</button>
+                    class="tbg px-2 mt-2 w-full rounded-sm">Сохранить черновик</button>
                 <button v-if="downloadFileId != ''" class="tbg px-2 mt-2 w-full rounded-sm"
                     @click="DownloadFileKZ()">Скачать документ</button>
             </div>
@@ -214,6 +215,22 @@
                             </li>
                         </ul>
                     </div>
+                    <div v-if="namedraft == 'Выступили'" class="flex flex-col">
+                        <h1>Голосование</h1>
+                        <h1>За:</h1>
+                        <input v-model="za" type="number" min="0" :max="numberAll" placeholder="Введите число за"
+                            class="mt-1 mb-6 font-sans w-80 border-none bg-gray-100 p-3 rounded"
+                            :onchange="updateNumber">
+                        <h1>Против:</h1>
+                        <input v-model="prot" type="number" min="0" :max="numberAll" placeholder="Введите число против"
+                            class="mt-1 mb-6 font-sans w-80 border-none bg-gray-100 p-3 rounded"
+                            :onchange="updateNumber">
+                        <h1>Воздерживаются:</h1>
+                        <input v-model="vozd" type="number" min="0" :max="numberAll"
+                            placeholder="Введите число воздержавшихся"
+                            class="mt-1 mb-6 font-sans w-80 border-none bg-gray-100 p-3 rounded"
+                            :onchange="updateNumber">
+                    </div>
                 </div>
                 <!-- Modal footer -->
                 <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
@@ -226,6 +243,45 @@
             </div>
         </div>
     </div>
+
+
+    <div v-for="item in json" :key="item.id" :id="'popup-modal-update' + json.indexOf(item)" tabindex="-1"
+        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-auto max-w-full max-h-full">
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <button type="button" :id="'closeModal' + json.indexOf(item)"
+                    class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                    :data-modal-hide="'popup-modal-update' + json.indexOf(item)">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+                <div class="p-4 md:p-5 text-center">
+                    <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Желаете обновить
+                        элемент?</h3>
+                    <textarea v-model="textdraftsModal" :id="'textdraftsModal' + json.indexOf(item)"
+                        class="resize rounded-md mt-1 mb-6 font-sans w-80 border-none bg-gray-100 p-3"
+                        placeholder="Введите новый текст"></textarea>
+                </div>
+                <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                    <button :data-modal-hide="'popup-modal-update' + json.indexOf(item)" type="button"
+                        :id="'delElem' + json.indexOf(item)"
+                        class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                        Удалить
+                    </button>
+                    <button :data-modal-hide="'popup-modal-update' + json.indexOf(item)" type="button"
+                        :id="'updateInfo' + json.indexOf(item)"
+                        class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Обновить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
     <div v-if="this.message != ''" id="error"
         class="flex items-center p-4 mb-4 text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 absolute right-0 bottom-0 w-52"
         role="alert">
@@ -245,6 +301,7 @@
 import PPS from '../services/pps.service';
 import FileServices from '../services/file.service';
 import UserService from '../services/user.service';
+import { Modal } from 'flowbite';
 export default {
     data() {
         return {
@@ -268,7 +325,12 @@ export default {
             currentDate: '',
             adminUser: '',
             filenamedownload: '',
-            downloadFileId: ''
+            downloadFileId: '',
+            textdraftsModal: '',
+            za: 0,
+            prot: 0,
+            vozd: 0,
+            numberAll: null
         }
     },
     mounted() {
@@ -312,6 +374,12 @@ export default {
         this.currentDate = `${year}-${month}-${day}`;
     },
     methods: {
+        updateNumber() {
+            this.numberAll = this.UsersPPS.length
+            this.numberAll = this.numberAll - this.za
+            this.numberAll = this.numberAll - this.prot
+            this.numberAll = this.numberAll - this.vozd
+        },
         checkboxQuestion(item) {
             const checkbox = document.getElementById('checkbox-item-' + item.id);
             if (checkbox.checked) {
@@ -333,7 +401,8 @@ export default {
             this.exempletext = searchelem[1];
         },
         addtitledraft() {
-            if (this.checkedItems.length != 0) {
+            console.log(this.json)
+            if (this.checkedItems.length != 0 && this.textdrafts != null) {
                 if (this.json.length == 0) {
                     let formData = {
                         key: this.titledraft,
@@ -344,7 +413,7 @@ export default {
                     this.json.push(formData)
                     this.score_title += 1;
                 }
-                else if (this.json[this.score - 1].titledraft != this.titledraft) {
+                else if (this.json[this.json.length - 1].titledraft != this.titledraft) {
                     this.score_title = 1;
                     let formData = {
                         key: this.titledraft,
@@ -354,7 +423,7 @@ export default {
                     }
                     this.json.push(formData)
                 }
-                else if (this.namedraft == this.json[this.score - 1].title) {
+                else if (this.namedraft == this.json[this.json.length - 1].title) {
                     let formData = {
                         key: this.titledraft + '.' + this.score_title,
                         titledraft: this.titledraft,
@@ -364,16 +433,16 @@ export default {
                     this.json.push(formData)
                     this.score_title += 1;
                 }
-                else if (this.json[this.score - 1].title == 'Слушали' && this.namedraft == 'Постановили') {
+                else if (this.json[this.json.length - 1].title == 'Слушали' && this.namedraft == 'Постановили') {
                     let formData = {
-                        key: this.json[this.score - 1].key,
+                        key: this.json[this.json.length - 1].key,
                         titledraft: this.titledraft,
                         title: this.namedraft,
                         text: this.textdrafts
                     }
                     this.json.push(formData)
                 }
-                else if (this.json[this.score - 1].title == 'Постановили' && this.namedraft == 'Слушали') {
+                else if (this.json[this.json.length - 1].title == 'Постановили' && this.namedraft == 'Слушали') {
                     let formData = {
                         key: this.titledraft + '.' + this.score_title,
                         titledraft: this.titledraft,
@@ -382,12 +451,15 @@ export default {
                     }
                     this.json.push(formData)
                 }
-                else if (this.json[this.score - 1].title == 'Постановили' && this.namedraft == 'Выступили') {
+                else if (this.json[this.json.length - 1].title == 'Постановили' && this.namedraft == 'Выступили') {
                     let formData = {
                         key: this.titledraft,
                         titledraft: this.titledraft,
                         title: this.namedraft,
-                        text: this.textdrafts
+                        text: this.textdrafts,
+                        za: this.za > 0 ? this.za : 'нет',
+                        prot: this.prot ? this.prot : 'нет',
+                        vozd: this.vozd ? this.vozd : 'нет'
                     }
                     this.json.push(formData)
                 }
@@ -408,14 +480,33 @@ export default {
                 }
             }
             else {
-                this.message = 'Проверьте, заполнена ли "Повестка дня"';
+                this.message = 'Проверьте, заполнена ли "Повестка дня" или текст';
                 setTimeout(() => {
                     this.message = '';
                 }, 5000);
             }
         },
         updatedraft(item) {
-            console.log(item)
+            const $targetEl = document.getElementById('popup-modal-update' + this.json.indexOf(item));
+            const $buttonCloseModal = document.getElementById('closeModal' + this.json.indexOf(item));
+            const $buttonUpdateInfo = document.getElementById('updateInfo' + this.json.indexOf(item));
+            const $buttonDelElem = document.getElementById('delElem' + this.json.indexOf(item));
+            const modal = new Modal($targetEl);
+            this.textdraftsModal = item.text;
+            modal.show();
+            $buttonCloseModal.onclick = function () {
+                modal.hide();
+            };
+            var array = this.json;
+            $buttonUpdateInfo.onclick = function () {
+                const new_text = document.getElementById('textdraftsModal' + array.indexOf(item)).value;
+                item.text = new_text;
+                modal.hide();
+            };
+            $buttonDelElem.onclick = function () {
+                array.splice(array.indexOf(item), 1);
+                modal.hide();
+            }
         },
         SaveDraftFile() {
             if (this.json.length != 0 && this.filename != null && this.selectName != null) {
@@ -469,6 +560,7 @@ export default {
                     this.filename = response.file.name;
                     this.score = this.json.length;
                     this.score_title = this.json.length;
+                    console.log(this.json)
                 }
             );
         },
@@ -481,6 +573,7 @@ export default {
                 pps: this.UsersPPS,
                 checkedItems: this.checkedItems
             }
+            console.log(formData)
             this.$store.dispatch('file/downloadfileZK', formData).then(
                 response => {
                     console.log(response)

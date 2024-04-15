@@ -114,3 +114,88 @@ def create_draft(data, output_docx_path, namepred, userscommission, userbd):
             combined_doc.element.body.append(element)
             
     combined_doc.save(output_docx_path)
+
+
+#Вствка данных в шаблон заседание кафедры
+def create_draft_ZK(data, pred, json, adminuser, pps, checkedItems):
+    docx = DocxTemplate('shablonZK.docx')
+    context = {}
+    date_obj = datetime.strptime(data, '%Y-%m-%d').date()
+    date_time_obj = datetime.combine(date_obj, datetime.min.time())
+    day_name = date_time_obj.strftime('%d')
+    month_name = date_time_obj.strftime('%B')
+    year_name = date_time_obj.strftime('%Y')
+    context['day'] = day_name
+    context['month'] = month_name
+    context['year'] = year_name
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT a.name, d.name, r.name FROM adminbd a, role r, departament d WHERE id_userbd = %s and a.id_role_pps = r.id and a.departament = d.id', (adminuser,))
+        execute_admin = cursor.fetchone()
+        context['name_kaf'] = execute_admin[1]
+        parts = execute_admin[0].split()
+        last_name = parts[0]
+        initials = ''.join([name[0] + '.' for name in parts[1:]])
+        shortened_name_admin = f"{last_name} {initials}"
+        context['admin'] = f'{execute_admin[2].lower()} {shortened_name_admin}'
+        parts = pred.split()
+        last_name = parts[0]
+        initials = ''.join([name[0] + '.' for name in parts[1:]])
+        shortened_name = f"{last_name} {initials}"
+        cursor.execute('select r."name" from pps p, role r where p."name" = %s and p.id_role = r.id', (pred,))
+        execute_pps_pred = cursor.fetchone()
+        context['chairperson'] = f'{execute_pps_pred[0].lower()} {shortened_name}'
+        context['checkedItems'] = checkedItems
+        role = execute_admin[1]
+        cursor.execute('select p."name" ,r."name" from pps p, role r, departament d where p.id_role = r.id and d."name" = %s', (role,))
+        execute_pps = cursor.fetchall()
+        pps = []
+        for item in execute_pps:
+            parts = item[0].split()
+            last_name = parts[0]
+            initials = ''.join([name[0] + '.' for name in parts[1:]])
+            shortened_name_pps = f"{last_name} {initials}"
+            pps.append(f'{item[1].lower()} {shortened_name_pps}, ')
+        pps.append(f'{execute_admin[2].lower()} {shortened_name_admin}')
+        context['pps'] = pps
+        context['countPPS'] = len(pps)
+        array_text = []
+        for item in json:
+            if item['title'] != 'Выступили':
+                text_dict = {
+                    'key': item['key'],
+                    'title': item['title'].upper(),
+                    'titledraft': item['titledraft'],
+                    'text': item['text']
+                }
+            else:
+                za = item['za']
+                prot = item['prot']
+                vozd = item['vozd']
+                golosovText = f'в голосовании участвовало {len(pps) - 1} человек:'
+                golosovstring = f'«ЗА» - {za}; «против» - {prot}; «воздержались» - {vozd};'
+                text_dict = {
+                    
+                    'key': '',
+                    'title': item['title'].upper(),
+                    'titledraft': item['titledraft'],
+                    'text': item['text'],
+                    'golosovTitle': 'Результаты голосования: ',
+                    'golosovText': golosovText,
+                    'stringGolosov': golosovstring
+                }
+            array_text.append(text_dict)
+        context['mainText'] = array_text
+        parts = pred.split()
+        last_name = parts[0]
+        initials = ''.join([name[0] + '.' for name in parts[1:]])
+        shortened_name = f"{initials} {last_name}"
+        context['zav_kaf'] = shortened_name
+        parts = execute_admin[0].split()
+        last_name = parts[0]
+        initials = ''.join([name[0] + '.' for name in parts[1:]])
+        shortened_name_admin = f"{initials} {last_name}"
+        context['uchen_secr'] = shortened_name_admin
+
+    docx.render(context)
+    docx.save("generated_docx.docx")

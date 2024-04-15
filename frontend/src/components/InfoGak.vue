@@ -27,8 +27,9 @@
                                         d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
                                 </svg>
                             </div>
-                            <input id="datepicker" datepicker datepicker-buttons datepicker-autohide
-                                datepicker-autoselect-today datepicker-format="yyyy-mm-dd" type="text"
+                            <input v-model="currentDateStart" id="datepicker" datepicker datepicker-buttons
+                                datepicker-autohide datepicker-autoselect-today datepicker-format="yyyy-mm-dd"
+                                type="text"
                                 class="bg-none border-dashed containercolorinfo text-sm rounded-3xl block w-44 h-7 ps-10 p-2.5 border-collapse"
                                 placeholder="Выберете дату">
                         </div>
@@ -68,7 +69,8 @@
                         </div>
                     </div>
                     <div class="border h-11 pl-5 pt-3 rounded-b-xl colorboxbottom overflow-x-auto">
-                        <div v-for="item in questions" class="cursor-pointer hover:font-extralight">
+                        <div v-for="item in questions" class="cursor-pointer hover:font-extralight"
+                            @click="updateQuestion(item)">
                             <p :key="item.title" class="cursordrop text-xs mr-1">{{ item.name }} - {{ item.title }}</p>
                         </div>
                     </div>
@@ -118,8 +120,9 @@
                                         d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
                                 </svg>
                             </div>
-                            <input id="datepicker_end" datepicker datepicker-buttons datepicker-autohide
-                                datepicker-autoselect-today datepicker-format="yyyy-mm-dd" type="text"
+                            <input v-model="currentDateEnd" id="datepicker_end" datepicker datepicker-buttons
+                                datepicker-autohide datepicker-autoselect-today datepicker-format="yyyy-mm-dd"
+                                type="text"
                                 class="bg-none border-dashed containercolorinfo text-sm rounded-3xl block w-44 h-7 ps-10 p-2.5 border-collapse"
                                 placeholder="Выберете дату">
                         </div>
@@ -172,6 +175,48 @@
             </div>
         </div>
     </div>
+
+
+
+
+
+
+
+    <div v-for="item in questions" :key="item.id" :id="'popup-modal-update' + questions.indexOf(item)" tabindex="-1"
+        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-auto max-w-full max-h-full">
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <button type="button" :id="'closeModal' + questions.indexOf(item)"
+                    class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                    :data-modal-hide="'popup-modal-update' + questions.indexOf(item)">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+                <div class="p-4 md:p-5 text-center">
+                    <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Желаете обновить
+                        элемент?</h3>
+                    <textarea v-model="textquestionModal" :id="'textdraftsModal' + questions.indexOf(item)"
+                        class="resize rounded-md mt-1 mb-6 font-sans w-80 border-none bg-gray-100 p-3"
+                        placeholder="Введите новый текст"></textarea>
+                </div>
+                <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                    <button :data-modal-hide="'popup-modal-update' + questions.indexOf(item)" type="button"
+                        :id="'delElem' + questions.indexOf(item)"
+                        class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                        Удалить
+                    </button>
+                    <button :data-modal-hide="'popup-modal-update' + questions.indexOf(item)" type="button"
+                        :id="'updateInfo' + questions.indexOf(item)"
+                        class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Обновить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 
     <!-- Modals page -->
@@ -317,10 +362,21 @@ export default {
             estimatesDip: '',
             count: 0,
             wigth: '0%',
-            message: ''
+            message: '',
+            currentDateStart: '',
+            currentDateEnd: '',
+            textquestionModal: ''
         }
     },
     mounted() {
+
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        this.currentDateStart = `${year}-${month}-${day}`;
+        this.currentDateEnd = `${year}-${month}-${day}`;
+
         FileServices.getfilelist().then(
             response => {
                 this.filelist = response.data.file_list;
@@ -374,7 +430,17 @@ export default {
             this.selectFileDownload = item;
             FileServices.getdatefromfile(item).then(
                 response => {
-                    document.getElementById('datepicker').value = response.date_start;
+                    if (response.date_start != '') {
+                        this.currentDateStart = response.date_start;
+                    }
+                    else {
+                        const today = new Date();
+                        const year = today.getFullYear();
+                        const month = String(today.getMonth() + 1).padStart(2, '0');
+                        const day = String(today.getDate()).padStart(2, '0');
+                        this.currentDateStart = `${year}-${month}-${day}`;
+                        this.currentDateEnd = `${year}-${month}-${day}`;
+                    }
                 }
             );
             FileServices.getinfofromfile(item).then(
@@ -556,6 +622,71 @@ export default {
                     }, 5000);
                 }
             )
+        },
+        updateQuestion(item) {
+            console.log(item)
+            const $targetEl = document.getElementById('popup-modal-update' + this.questions.indexOf(item));
+            const $buttonCloseModal = document.getElementById('closeModal' + this.questions.indexOf(item));
+            const $buttonUpdateInfo = document.getElementById('updateInfo' + this.questions.indexOf(item));
+            const $buttonDelElem = document.getElementById('delElem' + this.questions.indexOf(item));
+            const modal = new Modal($targetEl);
+            this.textquestionModal = item.title;
+            modal.show();
+            $buttonCloseModal.onclick = function () {
+                modal.hide();
+            };
+            var array = this.questions;
+            var request = this.$store;
+            var itemStudent = this.selectedItemDetails;
+            $buttonUpdateInfo.onclick = () => {
+                const old_text = item.title;
+                const new_text = document.getElementById('textdraftsModal' + array.indexOf(item)).value;
+                let formData = {
+                    old_text: old_text,
+                    new_text: new_text
+                }
+                request.dispatch('file/updateDataQuestion', formData).then(
+                    response => {
+                        if (response.status == 'success') {
+                            FileServices.getquestioncommission(itemStudent).then(
+                                response => {
+                                    this.questions = response.questions;
+                                }
+                            );
+                        }
+                    }
+                );
+                modal.hide();
+            };
+            $buttonDelElem.onclick = () => {
+                let formData = {
+                    name: item.name,
+                    data: item.title
+                }
+                this.$store.dispatch('file/delquestioncommission', formData).then(
+                    response => {
+                        if (response.status == 'success') {
+                            FileServices.getquestioncommission(itemStudent).then(
+                                response => {
+                                    this.questions = response.questions;
+                                }
+                            );
+                            this.count = 0;
+                            this.students.forEach((element) =>
+                                FileServices.checkstateuser(element).then(
+                                    response => {
+                                        if (response.state == true) {
+                                            this.count += 1;
+                                            this.wigth = (this.count / this.students.length) * 100 + '%';
+                                        }
+                                    }
+                                )
+                            );
+                        }
+                    }
+                );
+                modal.hide();
+            }
         }
     }
 }

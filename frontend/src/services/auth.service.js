@@ -21,13 +21,16 @@ class AuthService {
     TokenService.removeUser();
   }
 
-  register({login, name, password1, password2}) {
-    return api.post('/registration',{
+  register({ login, name, kaf_name, role, password1, password2 }) {
+    return api.post('/registration', {
       login,
       name,
+      kaf_name,
+      role,
       password1,
-      password2})
-      .then(response =>{
+      password2
+    })
+      .then(response => {
         return response.data;
       });
   }

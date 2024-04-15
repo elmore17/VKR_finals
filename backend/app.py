@@ -6,7 +6,7 @@ import jwt
 from functools import wraps
 from datetime import datetime, timedelta
 from pathlib import Path
-from docxcreate import read_docx, create_draft
+from docxcreate import read_docx, create_draft, create_draft_ZK
 from collections import defaultdict
 import json
 # instantiate the app
@@ -138,6 +138,8 @@ def registration():
         post_data = request.get_json()
         userlogin = post_data.get('login')
         username = post_data.get('name')
+        kaf_name = post_data.get('kaf_name')
+        role = post_data.get('role')
         password = post_data.get('password1')
         password2 = post_data.get('password2')
         if password == password2:
@@ -160,7 +162,22 @@ def registration():
             #Создание нового пользователя
             with get_db_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute("INSERT INTO adminbd (user_name, password, name) VALUES (%s, %s, %s)", (userlogin, hashed_password, username))
+                cursor.execute("SELECT id FROM departament WHERE full_name = %s", (kaf_name,))
+                execute_kafname = cursor.fetchone()
+                if execute_kafname is None:
+                    name = "".join(word[0].upper() for word in kaf_name.split())
+                    cursor.execute('INSERT INTO departament (name, full_name) VALUES (%s, %s)', (name, kaf_name))
+                    conn.commit()
+                    cursor.execute("SELECT id FROM departament WHERE full_name = %s", (kaf_name,))
+                    execute_kafname = cursor.fetchone()
+                cursor.execute("SELECT id FROM role WHERE name = %s", (role,))
+                execute_role = cursor.fetchone()
+                if execute_role is None:
+                    cursor.execute('INSERT INTO role (name) VALUES (%s)', (role,))
+                    conn.commit()
+                    cursor.execute("SELECT id FROM role WHERE name = %s", (role,))
+                    execute_role = cursor.fetchone()
+                cursor.execute("INSERT INTO adminbd (user_name, password, name, departament, id_role_pps) VALUES (%s, %s, %s, %s, %s)", (userlogin, hashed_password, username, execute_kafname, execute_role))
                 conn.commit()
                 return make_response(jsonify({'status': 'successful'}), 201)
         else:
@@ -381,7 +398,19 @@ def question_commission():
             cursor.execute("INSERT INTO protection_issues (id_student, id_user_commission, text_issues) VALUES (%s, %s, %s)", (idStudent, idUserCommission, textQuestion))
             conn.commit()
         return make_response(jsonify({'status': 'success'}))
-    
+
+@app.route('/updatedataquestion', methods=['POST'])
+def updatedataquestion():
+    post_data = request.get_json()
+    old_text = post_data.get('old_text')
+    new_text = post_data.get('new_text')
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE protection_issues SET text_issues = %s WHERE text_issues = %s", (new_text, old_text))
+        conn.commit()
+    return make_response(jsonify({'status': 'success'}))
+
+  
 @app.route('/estimates', methods=['GET', 'POST'])
 def estimates():
     if request.method == 'GET':
@@ -568,6 +597,21 @@ def del_user_pps():
            conn.commit()
         return make_response(jsonify({'status': 'success'}), 200)
     
+@app.route('/delquestioncommission', methods=['POST'])
+def del_question_commission():
+    post_data = request.get_json()
+    name = post_data.get('name')
+    data = post_data.get('data')
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('select uc.id_user from users_commission uc where uc.user_name = %s', (name,))
+        execute_usercommission = cursor.fetchone()
+        cursor.execute('select pi2.id from protection_issues pi2 where pi2.text_issues = %s and pi2.id_user_commission = %s', (data, execute_usercommission))
+        execute_protection_iss = cursor.fetchone()
+        cursor.execute('DELETE FROM protection_issues WHERE id = %s', (execute_protection_iss,))
+        conn.commit()
+    return make_response(jsonify({'status': 'success'}), 200)
+
 @app.route('/addquestion', methods=['POST', 'GET'])
 def add_question_kaf():
     if request.method == 'POST':
@@ -735,5 +779,7 @@ def download_file_ZK():
         adminuser = post_data.get('adminuser')
         pps = post_data.get('pps')
         checkedItems = post_data.get('checkedItems')
+        create_draft_ZK(data, pred, json, adminuser, pps, checkedItems)
+        return make_response(jsonify({'status': 'success'}), 200)
 
 app.run(host='0.0.0.0', port=83)

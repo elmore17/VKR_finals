@@ -172,6 +172,24 @@ class FileServices {
                 return response.data;
             });
     }
+    updateDataQuestion({ old_text, new_text }) {
+        return api.post('/updatedataquestion', {
+            old_text,
+            new_text
+        }).then(
+            response => {
+                return response.data;
+            });
+    }
+    delquestioncommission({ name, data }) {
+        return api.post('/delquestioncommission', {
+            name,
+            data
+        }).then(
+            response => {
+                return response.data;
+            });
+    }
 }
 
 export default new FileServices();

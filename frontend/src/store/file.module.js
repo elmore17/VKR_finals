@@ -94,7 +94,27 @@ export const file = {
             );
         },
         downloadfileZK({ commit }, data) {
-            return FileServices.downloadfile(data).then(
+            return FileServices.downloadfileZK(data).then(
+                response => {
+                    return Promise.resolve(response);
+                },
+                error => {
+                    return Promise.reject(error);
+                }
+            );
+        },
+        updateDataQuestion({ commit }, data) {
+            return FileServices.updateDataQuestion(data).then(
+                response => {
+                    return Promise.resolve(response);
+                },
+                error => {
+                    return Promise.reject(error);
+                }
+            );
+        },
+        delquestioncommission({ commit }, data) {
+            return FileServices.delquestioncommission(data).then(
                 response => {
                     return Promise.resolve(response);
                 },
