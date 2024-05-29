@@ -5,8 +5,16 @@
     <input v-model="login" type="text" placeholder="Логин"
       class="mt-16 mb-6 font-sans w-80 border-none bg-gray-100 p-3 rounded">
     <input v-model="name" type="text" placeholder="ФИО" class="mb-6 font-sans w-80 border-none bg-gray-100 p-3 rounded">
-    <input v-model="kaf_name" type="text" placeholder="Кафедра полное название" class="mb-6 font-sans w-80 border-none bg-gray-100 p-3 rounded">
-    <input v-model="role" type="text" placeholder="Введите должность" class="mb-6 font-sans w-80 border-none bg-gray-100 p-3 rounded">
+    <input v-model="kaf_name" list="departament" type="text" placeholder="Кафедра полное название"
+      class="mb-6 font-sans w-80 border-none bg-gray-100 p-3 rounded">
+    <datalist id="departament">
+      <option v-for="item in name_drafts_departament" :key="item.id" :value=item.full_name></option>
+    </datalist>
+    <input v-model="role" list="role" type="text" placeholder="Введите должность"
+      class="mb-6 font-sans w-80 border-none bg-gray-100 p-3 rounded">
+    <datalist id="role">
+      <option v-for="item in name_drafts_role" :key="item.id" :value=item.name></option>
+    </datalist>
     <input v-model="password1" type="password" placeholder="Пароль"
       class="mb-6 font-sans w-80 border-none bg-gray-100 p-3 rounded">
     <input v-model="password2" type="password" placeholder="Повторите пароль"
@@ -31,6 +39,7 @@
 </template>
 
 <script>
+import FileServices from '../services/file.service';
 export default {
   name: 'Registration',
   data() {
@@ -41,7 +50,9 @@ export default {
       password2: '',
       kaf_name: '',
       role: '',
-      message: ''
+      message: '',
+      name_drafts_departament: [],
+      name_drafts_role: []
     }
   },
   computed: {
@@ -53,6 +64,12 @@ export default {
     if (this.loggedIn) {
       this.$router.push("/");
     }
+    FileServices.getroleandmoreinfo().then(
+      response => {
+        this.name_drafts_departament = response.data.name_drafts_departament;
+        this.name_drafts_role = response.data.name_drafts_role;
+      }
+    );
   },
   methods: {
     onSubmit() {

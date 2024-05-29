@@ -170,6 +170,9 @@ class FileServices {
     getdraftsfile() {
         return api.get('/adddraftfile');
     }
+    getroleandmoreinfo() {
+        return api.get('/draftsrole');
+    }
     getdraftsfileinfo({ id }) {
         return api.get('/draftsfileinfo?id=' + id)
             .then(response => {

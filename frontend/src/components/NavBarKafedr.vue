@@ -448,20 +448,26 @@ onMounted(() => {
                     <input v-model="departament" list="departament" type="text" placeholder="Кафедра"
                         class="mt-1 mb-6 font-sans w-80 border-none bg-gray-100 p-3 rounded">
                     <datalist id="departament">
-                        <option v-for="item in UsersPPS" :key="item.id" :value=item.departament></option>
+                        <option v-for="item in name_drafts_departament" :key="item.id" :value=item.name></option>
                     </datalist>
                     <input v-model="post" list="role" type="text" placeholder="Должность"
                         class="mt-1 mb-6 font-sans w-80 border-none bg-gray-100 p-3 rounded">
                     <datalist id="role">
-                        <option v-for="item in UsersPPS" :key="item.id" :value=item.role></option>
+                        <option v-for="item in name_drafts_role" :key="item.id" :value=item.name></option>
                     </datalist>
                     <input v-model="academic_title" list="academic_title" type="text" placeholder="Ученое звание"
                         class="mt-1 mb-6 font-sans w-80 border-none bg-gray-100 p-3 rounded">
                     <datalist id="academic_title">
-                        <option v-for="item in UsersPPS" :key="item.id" :value=item.academic_title></option>
+                        <option v-for="item in name_drafts_academic_title" :key="item.id" :value=item.name></option>
                     </datalist>
-                    <input v-model="degree" type="number" min="1" placeholder="Степень"
+                    <input v-model="degree" list="academic_degree" type="text" placeholder="Степень"
                         class="mt-1 mb-6 font-sans w-80 border-none bg-gray-100 p-3 rounded">
+                    <datalist id="academic_degree">
+                        <option value="к.т.н."></option>
+                        <option value="д.т.н."></option>
+                        <option value="к.ф.-м.н."></option>
+                        <option value="к.э.н."></option>
+                    </datalist>
                 </div>
                 <!-- Modal footer -->
                 <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
@@ -522,7 +528,10 @@ export default {
             namedraft: '',
             namedraft_array: null,
             textdrafts: '',
-            draftsList: null
+            draftsList: null,
+            name_drafts_academic_title: [],
+            name_drafts_departament: [],
+            name_drafts_role: []
         };
     },
     computed: {
@@ -570,6 +579,13 @@ export default {
                 this.draftsList = response.data.draft;
             }
         );
+        FileServices.getroleandmoreinfo().then(
+            response => {
+                this.name_drafts_academic_title = response.data.name_drafts_academic_title;
+                this.name_drafts_departament = response.data.name_drafts_departament;
+                this.name_drafts_role = response.data.name_drafts_role;
+            }
+        );
     },
     methods: {
         logOut() {
@@ -577,7 +593,7 @@ export default {
             this.$router.push('/');
         },
         addpps() {
-            if (this.degree > 0 && this.FIO != '' && this.departament != '' && this.post != '' && this.academic_title != '') {
+            if (this.degree != null && this.FIO != '' && this.departament != '' && this.post != '' && this.academic_title != '') {
                 let formDate = {
                     name: this.FIO,
                     departament: this.departament,
@@ -590,7 +606,11 @@ export default {
                         if (response.status = "success") {
                             PPS.getpps().then(
                                 response => {
-                                    this.UsersPPS = response.data.pps;
+                                    PPS.getpps().then(
+                                        response => {
+                                            this.UsersPPS = response.data.pps;
+                                        }
+                                    );
                                 }
                             );
                         }

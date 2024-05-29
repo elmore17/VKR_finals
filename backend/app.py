@@ -695,6 +695,40 @@ def get_name_drafts():
                 name_drafts_list.append(draft_dict)
     return make_response(jsonify({'name_drafts': name_drafts_list}), 200)
 
+@app.route('/draftsrole', methods=['GET'])
+def get_draftsrole():
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM role')
+        roles = cursor.fetchall()
+        name_drafts_roles = []
+        for draft in roles:
+            draft_dict = {
+                'id': draft[0],
+                'name': draft[1]
+            }
+            name_drafts_roles.append(draft_dict)
+        cursor.execute('SELECT * FROM academic_title')
+        academic_title = cursor.fetchall()
+        name_drafts_academic_title = []
+        for draft in academic_title:
+            draft_dict_academic_title = {
+                'id': draft[0],
+                'name': draft[1]
+            }
+            name_drafts_academic_title.append(draft_dict_academic_title)
+        cursor.execute('SELECT * FROM departament')
+        departament = cursor.fetchall()
+        name_drafts_departament = []
+        for draft in departament:
+            draft_dict_departament = {
+                'id': draft[0],
+                'name': draft[1],
+                'full_name': draft[2]
+            }
+            name_drafts_departament.append(draft_dict_departament)
+    return make_response(jsonify({'name_drafts_role': name_drafts_roles, 'name_drafts_academic_title': name_drafts_academic_title, 'name_drafts_departament': name_drafts_departament}), 200)
+
 @app.route('/adddrafts', methods=['POST','GET'])
 def drafts():
     if request.method == 'POST':
