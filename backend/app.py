@@ -291,11 +291,15 @@ def upload_file():
                         conn.commit()
 
                     #Проверка наличия студента в БД
-                    cursor.execute("SELECT id FROM students WHERE name = %s AND title_gradual_work = %s", (item[26], item[29]))
-                    existing_student = cursor.fetchone()
-                    if existing_student is None:
-                        cursor.execute("INSERT INTO students (name, title_gradual_work, id_scientific_adviser) VALUES (%s, %s, %s)", (item[26], item[29], existing_scientific_adviser))
-                        conn.commit()
+                    # cursor.execute("SELECT id_filepath FROM filepath WHERE filename = %s", (uploaded_file.filename,))
+                    # existing_filepath = cursor.fetchone()
+                    # cursor.execute("SELECT s.id FROM students s, graduate_work gw WHERE s.name = %s AND s.title_gradual_work = %s AND gw.id_student = s.id AND gw.id_filepath = %s", (item[26], item[29], existing_filepath))
+                    # existing_student = cursor.fetchone()
+                    # if existing_student is None:
+                    cursor.execute("SELECT id_filepath FROM filepath WHERE filename = %s", (uploaded_file.filename,))
+                    existing_filepath = cursor.fetchone()
+                    cursor.execute("INSERT INTO students (name, title_gradual_work, id_scientific_adviser, id_filepath) VALUES (%s, %s, %s, %s)", (item[26], item[29], existing_scientific_adviser, existing_filepath))
+                    conn.commit()
                     
                     #Проверка наличия квалификации в БД
                     cursor.execute("SELECT id FROM level_education WHERE name_level_education = %s", (item[121], ))
@@ -312,6 +316,8 @@ def upload_file():
                         conn.commit()
 
                     #Таблица для шаблонизации
+                    cursor.execute("SELECT id FROM students WHERE name = %s AND title_gradual_work = %s AND id_filepath = %s", (item[26], item[29], existing_filepath))
+                    existing_student = cursor.fetchone()
                     cursor.execute("SELECT id FROM graduate_work WHERE id_student = %s", (existing_student,))
                     existing_graduate_work = cursor.fetchone()
                     cursor.execute("SELECT id_filepath FROM filepath WHERE filename = %s", (uploaded_file.filename,))
@@ -447,6 +453,25 @@ def estimates():
                 cursor.execute("UPDATE assessments SET score_graduate_work = %s, score_graduate = %s WHERE id_student = %s", (score_gw, score_g, student_id))
                 conn.commit()
         return make_response(jsonify({'status': 'success'}))
+    
+@app.route('/updatestateuser', methods=['GET', 'POST'])
+def updatestateuser():
+    if request.method == 'GET':
+        id = request.args.get('id')
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('select state from students where id = %s', (id,))
+            state_check = cursor.fetchone()
+            return make_response(jsonify({'state': state_check[0]}))
+    if request.method == 'POST':
+        post_data = request.get_json()
+        student_id = post_data.get('student_id')
+        state = post_data.get('state')
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("UPDATE students SET state = %s WHERE id = %s", (state, student_id))
+            conn.commit()
+        return make_response(jsonify({'status': 'success'}))
      
 @app.route('/get_estimatesvkr', methods=['GET'])
 def estimates_vkr():
@@ -473,7 +498,9 @@ def check_status_user():
         assessments = cursor.fetchone()
         cursor.execute('select * from protection_issues where id_student = %s', (id,))
         protection_issues = cursor.fetchone()
-        if (assessments != None and protection_issues != None):
+        cursor.execute('select state from students where id = %s', (id,))
+        state_user = cursor.fetchone()
+        if (assessments != None and protection_issues != None or state_user[0] == False):
             state = True
         else:
             state = False

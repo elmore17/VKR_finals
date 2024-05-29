@@ -205,11 +205,11 @@ onMounted(() => {
                     <input id="datepicker_start" datepicker datepicker-buttons datepicker-autohide
                         datepicker-autoselect-today datepicker-format="yyyy-mm-dd" type="text"
                         class="mt-1 mb-6 font-sans w-80 border-none bg-gray-100 p-3 rounded"
-                        placeholder="Выберете дату начала">
+                        placeholder="Выберите дату начала">
                     <input id="datepicker_end" datepicker datepicker-buttons datepicker-autohide
                         datepicker-autoselect-today datepicker-format="yyyy-mm-dd" type="text"
                         class="mt-1 mb-6 font-sans w-80 border-none bg-gray-100 p-3 rounded"
-                        placeholder="Выберете дату конец">
+                        placeholder="Выберите дату окончания">
                 </div>
                 <!-- Modal footer -->
                 <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">

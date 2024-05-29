@@ -33,6 +33,16 @@ export const file = {
                 }
             );
         },
+        updatestateuser({ commit }, data) {
+            return FileServices.updatestateuser(data).then(
+                response => {
+                    return Promise.resolve(response);
+                },
+                error => {
+                    return Promise.reject(error);
+                }
+            )
+        },
         downloadfile({ commit }, data) {
             return FileServices.downloadfile(data).then(
                 response => {

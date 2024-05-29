@@ -7,7 +7,7 @@
                     <p class="text-white font-medium text-xl">Заполнение информации</p>
                 </div>
                 <button data-modal-target="AddFileStudents" data-modal-toggle="AddFileStudents"
-                    class="flex flex-row items-center tbg px-2 rounded-xl">
+                    class="flex flex-row items-center tbg px-3 rounded-xl text-white h-8">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="w-3 h-3">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -58,8 +58,9 @@
                     <div class="border h-28 pl-5 pt-5 rounded-t-xl colorboxinfo">
                         <div class="flex justify-between flex-nowrap items-start">
                             <p class="text-white font-medium text-lg pb-2">Вопросы</p>
-                            <button data-modal-target="AddQuestionStudents" data-modal-toggle="AddQuestionStudents"
-                                class="flex flex-row items-center tbg px-2 mr-5 rounded-xl">
+                            <button @click="AddQuestionStudents" data-modal-target="AddQuestionStudents"
+                                data-modal-toggle="AddQuestionStudents"
+                                class="flex flex-row items-center tbg px-3 mr-5 rounded-xl text-white h-8">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -77,6 +78,21 @@
                 </div>
             </div>
             <div v-if="selectedItemDetails != null" class="grid grid-cols-2 mt-5 gap-5 max-w-3xl">
+                <div class="mt-5">
+                    <div class="border max-w-96 h-28 pl-5 pt-5 rounded-t-xl colorboxinfo">
+                        <p class="text-white font-medium text-lg pb-2">Присутствие на защите ВКР</p>
+                        <div class="relative max-w-sm">
+                            <select v-model="stateuser" id="estimatesVKR"
+                                class="bg-none border-dashed containercolorinfo text-sm rounded-3xl block w-44 ps-3 p-2.5 border-collapse"
+                                @change="addBe($event)">
+                                <option value="true">Да</option>
+                                <option value="false">Нет</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="border max-w-96 h-11 pl-5 pt-3 rounded-b-xl colorboxbottom overflow-x-auto">
+                    </div>
+                </div>
                 <div class="mt-5">
                     <div class="border max-w-96 h-28 pl-5 pt-5 rounded-t-xl colorboxinfo">
                         <p class="text-white font-medium text-lg pb-2">Оценка за ВКР</p>
@@ -160,15 +176,15 @@
                     <p style="color: #71717A;">{{ count }} / {{ students.length }}</p>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full dark:bg-gray-700 mt-1">
-                    <div class="tbg text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full"
+                    <div class="tbg text-xs font-medium text-black text-center p-0.5 leading-none rounded-full"
                         :style="{ 'width': wigth }"> {{ wigth }}</div>
                 </div>
-                <button v-if="wigth == '100%' && count == students.length" class="tbg px-2 mt-2 w-full rounded-xl"
-                    @click="DownloadDOCX">Скачать протокол</button>
+                <button v-if="wigth == '100.00%' && count == students.length"
+                    class="tbg px-2 mt-2 w-full rounded-xl text-white" @click="DownloadDOCX">Скачать протокол</button>
             </div>
             <div class="overflow-auto border rounded-b-xl colorboxbottom max-h-60">
                 <div v-for="item in students" :key="item.id"
-                    class=" h-11 pl-5 pt-2 hover:bg-white rounded-b-xl cursor-pointer"
+                    class=" h-11 pl-5 pt-2 hover:bg-white rounded-xl cursor-pointer"
                     :class="{ 'bg-white': item === selectedItemDetails }" @click="toggleDetails(item)">
                     <p class="cursordrop text-lg">{{ item.name }}</p>
                 </div>
@@ -263,7 +279,8 @@
                 </div>
                 <!-- Modal footer -->
                 <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-                    <button class="py-2.5 px-5 ms-3 text-sm font-medium tbg rounded-lg" @click="ImportProtocol()">
+                    <button class="py-2.5 px-5 ms-3 text-sm font-medium tbg rounded-lg text-white"
+                        @click="ImportProtocol()">
                         Добавить протокол
                     </button>
                     <button data-modal-hide="AddFileStudents" type="button"
@@ -283,7 +300,7 @@
                     <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                         Добавление вопроса
                     </h3>
-                    <button type="button"
+                    <button type="button" id="AddQuestionStudentsClouse"
                         class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
                         data-modal-hide="AddQuestionStudents">
                         <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -310,10 +327,11 @@
                 </div>
                 <!-- Modal footer -->
                 <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-                    <button @click="AddQuestion()" class="py-2.5 px-5 ms-3 text-sm font-medium tbg rounded-lg">
+                    <button @click="AddQuestion()"
+                        class="py-2.5 px-5 ms-3 text-sm font-medium tbg rounded-lg text-white">
                         Добавить вопрос
                     </button>
-                    <button data-modal-hide="AddQuestionStudents" type="button"
+                    <button data-modal-hide="AddQuestionStudents" type="button" id="AddQuestionStudentsClouseModal"
                         class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Отмена</button>
                 </div>
             </div>
@@ -357,15 +375,16 @@ export default {
             textQuestion: null,
             estimates: [],
             estimates_dip: [],
-            estimatesVKR: '',
+            estimatesVKR: null,
             estimatesVKR_Title: '',
-            estimatesDip: '',
+            estimatesDip: null,
             count: 0,
             wigth: '0%',
             message: '',
             currentDateStart: '',
             currentDateEnd: '',
-            textquestionModal: ''
+            textquestionModal: '',
+            stateuser: null
         }
     },
     mounted() {
@@ -452,7 +471,7 @@ export default {
                             response => {
                                 if (response.state == true) {
                                     this.count += 1;
-                                    this.wigth = (this.count / this.students.length) * 100 + '%';
+                                    this.wigth = ((this.count / this.students.length) * 100).toFixed(2) + '%';
                                 }
                             }
                         )
@@ -515,7 +534,7 @@ export default {
                         response => {
                             if (response.state == true) {
                                 this.count += 1;
-                                this.wigth = (this.count / this.students.length) * 100 + '%';
+                                this.wigth = ((this.count / this.students.length) * 100).toFixed(2) + '%';
                             }
                         }
                     )
@@ -525,7 +544,25 @@ export default {
                         document.getElementById('datepicker_end').value = response.date_end;
                     }
                 );
+                FileServices.getstateuserbe(this.selectedItemDetails).then(
+                    response => {
+                        this.stateuser = response.state;
+                    }
+                );
             }
+        },
+        AddQuestionStudents() {
+            const $targetEl = document.getElementById("AddQuestionStudents");
+            const $buttonCloseModal = document.getElementById('AddQuestionStudentsClouse');
+            const $buttonCloseModalButton = document.getElementById('AddQuestionStudentsClouseModal');
+            const modal = new Modal($targetEl);
+            modal.show();
+            $buttonCloseModal.onclick = function () {
+                modal.hide();
+            };
+            $buttonCloseModalButton.onclick = function () {
+                modal.hide();
+            };
         },
         AddQuestion() {
             if (this.selectedItemDetails != null && this.idCommissionUser != null && this.textQuestion != null) { //нужно дописать исключение
@@ -572,7 +609,7 @@ export default {
                                 response => {
                                     if (response.state == true) {
                                         this.count += 1;
-                                        this.wigth = (this.count / this.students.length) * 100 + '%';
+                                        this.wigth = ((this.count / this.students.length) * 100).toFixed(2) + '%';
                                     }
                                 }
                             )
@@ -624,7 +661,6 @@ export default {
             )
         },
         updateQuestion(item) {
-            console.log(item)
             const $targetEl = document.getElementById('popup-modal-update' + this.questions.indexOf(item));
             const $buttonCloseModal = document.getElementById('closeModal' + this.questions.indexOf(item));
             const $buttonUpdateInfo = document.getElementById('updateInfo' + this.questions.indexOf(item));
@@ -677,7 +713,7 @@ export default {
                                     response => {
                                         if (response.state == true) {
                                             this.count += 1;
-                                            this.wigth = (this.count / this.students.length) * 100 + '%';
+                                            this.wigth = ((this.count / this.students.length) * 100).toFixed(2) + '%';
                                         }
                                     }
                                 )
@@ -687,6 +723,23 @@ export default {
                 );
                 modal.hide();
             }
+        },
+        addBe(event) {
+            let formData = {
+                student_id: this.selectedItemDetails.id,
+                state: event.target.value
+            }
+            this.$store.dispatch('file/updatestateuser', formData).then(
+                response => {
+                    if (response.status == 'success') {
+                        FileServices.getstateuserbe(this.selectedItemDetails).then(
+                            response => {
+                                this.stateuser = response.state;
+                            }
+                        );
+                    }
+                }
+            );
         }
     }
 }

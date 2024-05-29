@@ -27,6 +27,13 @@ class FileServices {
     getnamedrafts() {
         return api.get('/namedrafts');
     }
+    getstateuserbe({ id }) {
+        return api.get('/updatestateuser?id=' + id).then(
+            response => {
+                return response.data;
+            }
+        );
+    }
     getinfofromfile({ id }) {
         return api.get('/getinfofromfile?id=' + id)
             .then(response => {
@@ -67,6 +74,16 @@ class FileServices {
             student_id,
             score_gw,
             score_g
+        }).then(
+            response => {
+                return response.data;
+            }
+        )
+    }
+    updatestateuser({ student_id, state }) {
+        return api.post('/updatestateuser', {
+            student_id,
+            state
         }).then(
             response => {
                 return response.data;

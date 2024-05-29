@@ -130,7 +130,7 @@ def create_draft_ZK(data, pred, json, adminuser, pps, checkedItems):
     context['year'] = year_name
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute('SELECT a.name, d.name, r.name FROM adminbd a, role r, departament d WHERE id_userbd = %s and a.id_role_pps = r.id and a.departament = d.id', (adminuser,))
+        cursor.execute('SELECT a.name, d.name, r.name, d.full_name FROM adminbd a, role r, departament d WHERE id_userbd = %s and a.id_role_pps = r.id and a.departament = d.id', (adminuser,))
         execute_admin = cursor.fetchone()
         context['name_kaf'] = execute_admin[1]
         parts = execute_admin[0].split()
@@ -196,6 +196,7 @@ def create_draft_ZK(data, pred, json, adminuser, pps, checkedItems):
         initials = ''.join([name[0] + '.' for name in parts[1:]])
         shortened_name_admin = f"{initials} {last_name}"
         context['uchen_secr'] = shortened_name_admin
+        context['name_kaf_full'] = execute_admin[3]
 
     docx.render(context)
     docx.save("generated_docx.docx")
