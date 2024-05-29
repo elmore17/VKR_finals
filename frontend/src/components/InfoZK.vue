@@ -423,7 +423,6 @@ export default {
                     this.json.push(formData)
                 }
                 else if (this.namedraft == this.json[this.json.length - 1].title) {
-                    this.score_title_two = 1;
                     let formData = {
                         key: this.score_title + '.' + this.score_title_two,
                         titledraft: this.titledraft,
