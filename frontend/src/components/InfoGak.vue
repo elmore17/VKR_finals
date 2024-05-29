@@ -58,8 +58,8 @@
                     <div class="border h-28 pl-5 pt-5 rounded-t-xl colorboxinfo">
                         <div class="flex justify-between flex-nowrap items-start">
                             <p class="text-white font-medium text-lg pb-2">Вопросы</p>
-                            <button @click="AddQuestionStudents" data-modal-target="AddQuestionStudents"
-                                data-modal-toggle="AddQuestionStudents"
+                            <button v-if="questions.length < 5" @click="AddQuestionStudents"
+                                data-modal-target="AddQuestionStudents" data-modal-toggle="AddQuestionStudents"
                                 class="flex flex-row items-center tbg px-3 mr-5 rounded-xl text-white h-8">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="w-3 h-3">

@@ -291,15 +291,13 @@ def upload_file():
                         conn.commit()
 
                     #Проверка наличия студента в БД
-                    # cursor.execute("SELECT id_filepath FROM filepath WHERE filename = %s", (uploaded_file.filename,))
-                    # existing_filepath = cursor.fetchone()
-                    # cursor.execute("SELECT s.id FROM students s, graduate_work gw WHERE s.name = %s AND s.title_gradual_work = %s AND gw.id_student = s.id AND gw.id_filepath = %s", (item[26], item[29], existing_filepath))
-                    # existing_student = cursor.fetchone()
-                    # if existing_student is None:
                     cursor.execute("SELECT id_filepath FROM filepath WHERE filename = %s", (uploaded_file.filename,))
                     existing_filepath = cursor.fetchone()
-                    cursor.execute("INSERT INTO students (name, title_gradual_work, id_scientific_adviser, id_filepath) VALUES (%s, %s, %s, %s)", (item[26], item[29], existing_scientific_adviser, existing_filepath))
-                    conn.commit()
+                    cursor.execute("SELECT id FROM students WHERE name = %s AND id_filepath = %s", (item[26], existing_filepath))
+                    existing_student = cursor.fetchone()
+                    if existing_student is None:
+                        cursor.execute("INSERT INTO students (name, title_gradual_work, id_scientific_adviser, id_filepath) VALUES (%s, %s, %s, %s)", (item[26], item[29], existing_scientific_adviser, existing_filepath))
+                        conn.commit()
                     
                     #Проверка наличия квалификации в БД
                     cursor.execute("SELECT id FROM level_education WHERE name_level_education = %s", (item[121], ))
@@ -806,7 +804,18 @@ def download_file_ZK():
         adminuser = post_data.get('adminuser')
         pps = post_data.get('pps')
         checkedItems = post_data.get('checkedItems')
-        create_draft_ZK(data, pred, json, adminuser, pps, checkedItems)
+        fileId = post_data.get('fileId')
+        output_path = f'Готовый_протокол_заседания_кафедры_{fileId}.docx'
+        create_draft_ZK(data, pred, json, adminuser, pps, checkedItems, output_path)
         return make_response(jsonify({'status': 'success'}), 200)
+    if request.method == 'GET':
+        file_id = request.args.get('id')
+        output_path = f'Готовый_протокол_заседания_кафедры_{file_id}.docx'
+        if output_path:
+            return send_file(
+                f'/Users/danilegorkin/Documents/VKR/{output_path}', as_attachment=True
+            )
+        else:
+            return make_response(jsonify({'error': 'output_path is missing'}), 400)
 
 app.run(host='0.0.0.0', port=83)

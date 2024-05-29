@@ -176,14 +176,15 @@ class FileServices {
                 return response.data;
             });
     }
-    downloadfileZK({ data, pred, json, adminuser, pps, checkedItems }) {
+    downloadfileZK({ data, pred, json, adminuser, pps, checkedItems, fileId }) {
         return api.post('/downloadfileZK', {
             data,
             pred,
             json,
             adminuser,
             pps,
-            checkedItems
+            checkedItems,
+            fileId
         }).then(
             response => {
                 return response.data;

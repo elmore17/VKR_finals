@@ -45,7 +45,7 @@
                         <div class="flex justify-between flex-nowrap items-start">
                             <p class="text-white font-medium text-lg pb-2">Повеска дня</p>
                             <button id="dropdownSearchButton" data-dropdown-toggle="dropdownSearch"
-                                class="flex flex-row items-center tbg px-2 mr-5 rounded-xl">
+                                class="flex flex-row items-center tbg px-2 mr-5 rounded-xl text-white h-8">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -66,7 +66,7 @@
                             <p :key="item.id" class="cursordrop text-2xl mr-1">{{ item.title }} {{ item.key }}</p>
                         </div>
                         <button data-modal-target="AddDraft" data-modal-toggle="AddDraft"
-                            class="flex flex-row items-center tbg px-2 mr-5 mb-3 rounded-sm">
+                            class="flex flex-row items-center tbg px-2 mr-5 mb-3 rounded-lg text-white h-8">
                             Добавить
                         </button>
                     </div>
@@ -92,8 +92,8 @@
             <div class="mt-10 border rounded-xl px-5 py-4 colorboxinfo" style="border-color: #71717A;">
                 <p class="text-white font-medium text-lg pb-2 text-start">Действия</p>
                 <button data-modal-target="popup-modal" data-modal-toggle="popup-modal"
-                    class="tbg px-2 mt-2 w-full rounded-sm">Сохранить черновик</button>
-                <button v-if="downloadFileId != ''" class="tbg px-2 mt-2 w-full rounded-sm"
+                    class="tbg px-2 mt-2 w-full rounded-sm text-white h-8">Сохранить черновик</button>
+                <button v-if="downloadFileId != ''" class="tbg px-2 mt-2 w-full rounded-sm text-white h-8"
                     @click="DownloadFileKZ()">Скачать документ</button>
             </div>
         </div>
@@ -194,14 +194,14 @@
                 <div class="p-4 md:p-5 space-y-4">
                     <div class="">
                         <select v-model="namedraft" @change="getListDrafts"
-                            class="bg-white border-dashed text-sm rounded-3xl block w-44 ps-3 p-2.5 border-collapse">
+                            class="bg-white border-dashed text-sm rounded-3xl block w-80 ps-3 p-2.5 border-collapse">
                             <option v-for="item in namedraft_array" :key="item.id" :value="item.name">{{ item.name }}
                             </option>
                         </select>
                     </div>
                     <div class="">
                         <select v-model="titledraft"
-                            class="bg-white border-dashed text-sm rounded-3xl block w-44 ps-3 p-2.5 border-collapse">
+                            class="bg-white border-dashed text-sm rounded-3xl block w-80 ps-3 p-2.5 border-collapse">
                             <option v-for="item in checkedItems" :key="item.id" :value="item.id">{{ item.name }}
                             </option>
                         </select>
@@ -318,7 +318,8 @@ export default {
             titledraft: null,
             json: [],
             score: 0,
-            score_title: 0,
+            score_title: 1,
+            score_title_two: 1,
             message: '',
             exempletext: null,
             showDropdown: false,
@@ -401,22 +402,20 @@ export default {
             this.exempletext = searchelem[1];
         },
         addtitledraft() {
-            console.log(this.json)
             if (this.checkedItems.length != 0 && this.textdrafts != null) {
                 if (this.json.length == 0) {
                     let formData = {
-                        key: this.titledraft,
+                        key: this.score_title,
                         titledraft: this.titledraft,
                         title: this.namedraft,
                         text: this.textdrafts
                     }
                     this.json.push(formData)
-                    this.score_title += 1;
                 }
                 else if (this.json[this.json.length - 1].titledraft != this.titledraft) {
-                    this.score_title = 1;
+                    this.score_title += 1;
                     let formData = {
-                        key: this.titledraft,
+                        key: this.score_title,
                         titledraft: this.titledraft,
                         title: this.namedraft,
                         text: this.textdrafts
@@ -424,18 +423,21 @@ export default {
                     this.json.push(formData)
                 }
                 else if (this.namedraft == this.json[this.json.length - 1].title) {
+                    this.score_title_two = 1;
                     let formData = {
-                        key: this.titledraft + '.' + this.score_title,
+                        key: this.score_title + '.' + this.score_title_two,
                         titledraft: this.titledraft,
                         title: this.namedraft,
                         text: this.textdrafts
                     }
                     this.json.push(formData)
-                    this.score_title += 1;
+                    this.score_title_two += 1;
                 }
                 else if (this.json[this.json.length - 1].title == 'Слушали' && this.namedraft == 'Постановили') {
+                    this.score_title_two = 1;
+                    this.score_title += 1;
                     let formData = {
-                        key: this.json[this.json.length - 1].key,
+                        key: this.score_title,
                         titledraft: this.titledraft,
                         title: this.namedraft,
                         text: this.textdrafts
@@ -443,17 +445,19 @@ export default {
                     this.json.push(formData)
                 }
                 else if (this.json[this.json.length - 1].title == 'Постановили' && this.namedraft == 'Слушали') {
+                    this.score_title += 1;
                     let formData = {
-                        key: this.titledraft + '.' + this.score_title,
+                        key: this.score_title,
                         titledraft: this.titledraft,
                         title: this.namedraft,
                         text: this.textdrafts
                     }
                     this.json.push(formData)
                 }
-                else if (this.json[this.json.length - 1].title == 'Постановили' && this.namedraft == 'Выступили') {
+                else if (this.namedraft == 'Выступили') {
+                    this.score_title += 1;
                     let formData = {
-                        key: this.titledraft,
+                        key: this.score_title,
                         titledraft: this.titledraft,
                         title: this.namedraft,
                         text: this.textdrafts,
@@ -560,7 +564,6 @@ export default {
                     this.filename = response.file.name;
                     this.score = this.json.length;
                     this.score_title = this.json.length;
-                    console.log(this.json)
                 }
             );
         },
@@ -571,12 +574,14 @@ export default {
                 json: this.json,
                 adminuser: this.adminUser,
                 pps: this.UsersPPS,
-                checkedItems: this.checkedItems
+                checkedItems: this.checkedItems,
+                fileId: this.downloadFileId
             }
-            console.log(formData)
             this.$store.dispatch('file/downloadfileZK', formData).then(
                 response => {
-                    console.log(response)
+                    if (response.status == 'success') {
+                        location.href = 'http://127.0.0.1:83/downloadfileZK?id=' + this.downloadFileId;
+                    }
                 }
             );
         }

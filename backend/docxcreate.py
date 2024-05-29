@@ -117,7 +117,7 @@ def create_draft(data, output_docx_path, namepred, userscommission, userbd):
 
 
 #Вствка данных в шаблон заседание кафедры
-def create_draft_ZK(data, pred, json, adminuser, pps, checkedItems):
+def create_draft_ZK(data, pred, json, adminuser, pps, checkedItems, output_path):
     docx = DocxTemplate('shablonZK.docx')
     context = {}
     date_obj = datetime.strptime(data, '%Y-%m-%d').date()
@@ -199,4 +199,4 @@ def create_draft_ZK(data, pred, json, adminuser, pps, checkedItems):
         context['name_kaf_full'] = execute_admin[3]
 
     docx.render(context)
-    docx.save("generated_docx.docx")
+    docx.save(output_path)
