@@ -1,0 +1,245 @@
+CREATE TABLE public.graduate_work (
+	id serial4 NOT NULL,
+	id_student int4 NULL,
+	id_direction int4 NULL,
+	id_scientific_adviser int4 NULL,
+	id_level_education int4 NULL,
+	id_speciality int4 NULL,
+	date_start date NULL,
+	date_end date NULL,
+	id_filepath int4 NULL,
+	CONSTRAINT graduate_work_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.direction (
+	id serial4 NOT NULL,
+	name_direction varchar(255) NULL,
+	CONSTRAINT direction_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.scientific_adviser (
+	id serial4 NOT NULL,
+	name_adviser varchar(255) NULL,
+	"role" varchar(255) NULL,
+	CONSTRAINT scientific_adviser_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.questions (
+	id serial4 NOT NULL,
+	"name" text NULL,
+	"month" varchar(255) NULL,
+	CONSTRAINT questions_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.filepath (
+	id_filepath serial4 NOT NULL,
+	filename varchar(255) NULL,
+	date_create date NULL,
+	CONSTRAINT filepath_pkey PRIMARY KEY (id_filepath)
+);
+
+CREATE TABLE public.name_drafts (
+	id serial4 NOT NULL,
+	"name" text NULL,
+	CONSTRAINT name_drafts_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.level_education (
+	id serial4 NOT NULL,
+	name_level_education varchar(100) NULL,
+	CONSTRAINT level_education_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.graduate_estimates (
+	id_estimates serial4 NOT NULL,
+	"name" varchar(50) NULL,
+	CONSTRAINT graduate_estimates_pkey PRIMARY KEY (id_estimates)
+);
+
+CREATE TABLE public.academic_title (
+	id serial4 NOT NULL,
+	"name" varchar(255) NULL,
+	CONSTRAINT academic_title_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.speciality (
+	id serial4 NOT NULL,
+	name_speciality text NULL,
+	CONSTRAINT speciality_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public."role" (
+	id serial4 NOT NULL,
+	"name" varchar(255) NULL,
+	CONSTRAINT role_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.drafts_file (
+	id serial4 NOT NULL,
+	"name" varchar(255) NULL,
+	"text" text NULL,
+	"data" date NULL,
+	admin_name varchar(255) NULL,
+	chairperson varchar(255) NULL,
+	checkeditems text NULL,
+	CONSTRAINT drafts_file_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.students (
+	id serial4 NOT NULL,
+	"name" varchar(255) NULL,
+	title_gradual_work text NULL,
+	id_scientific_adviser int4 NULL,
+	id_filepath int4 NULL,
+	state bool NULL,
+	CONSTRAINT students_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.pps (
+	id serial4 NOT NULL,
+	"name" varchar(255) NULL,
+	id_role int4 NULL,
+	id_academic_title int4 NULL,
+	departament int4 NULL,
+	"degree" varchar(255) NULL,
+	CONSTRAINT pps_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.drafts (
+	id serial4 NOT NULL,
+	id_name int4 NULL,
+	"text" text NULL,
+	CONSTRAINT drafts_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.departament (
+	id serial4 NOT NULL,
+	"name" varchar(255) NULL,
+	full_name varchar(255) NULL,
+	CONSTRAINT departament_pkey PRIMARY KEY (id)
+);
+
+
+CREATE TABLE public.protection_issues (
+	id serial4 NOT NULL,
+	id_student int4 NULL,
+	id_user_commission int4 NULL,
+	text_issues text NULL,
+	CONSTRAINT protection_issues_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.users_commission (
+	id_user int4 DEFAULT nextval('users_id_user_seq'::regclass) NOT NULL,
+	user_name varchar(255) NULL,
+	post varchar(255) NULL,
+	start_data date NULL,
+	end_data date NULL,
+	CONSTRAINT users_pkey PRIMARY KEY (id_user)
+);
+
+CREATE TABLE public.assessments (
+	id serial4 NOT NULL,
+	id_student int4 NULL,
+	score_graduate_work int4 NULL,
+	score_graduate int4 NULL,
+	CONSTRAINT assessments_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.existing_estimates (
+	id serial4 NOT NULL,
+	"name" varchar(50) NULL,
+	"text" text NULL,
+	CONSTRAINT existing_estimates_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.adminbd (
+	id_userbd serial4 NOT NULL,
+	user_name varchar(255) NULL,
+	"password" varchar(255) NULL,
+	"name" varchar(255) NULL,
+	departament int4 NULL,
+	id_role_pps int4 NULL,
+	CONSTRAINT adminbd_pkey PRIMARY KEY (id_userbd)
+);
+
+
+ALTER TABLE public.graduate_work ADD CONSTRAINT graduate_work_id_direction_fkey FOREIGN KEY (id_direction) REFERENCES public.direction(id);
+ALTER TABLE public.graduate_work ADD CONSTRAINT graduate_work_id_filepath_fkey FOREIGN KEY (id_filepath) REFERENCES public.filepath(id_filepath);
+ALTER TABLE public.graduate_work ADD CONSTRAINT graduate_work_id_level_education_fkey FOREIGN KEY (id_level_education) REFERENCES public.level_education(id);
+ALTER TABLE public.graduate_work ADD CONSTRAINT graduate_work_id_scientific_adviser_fkey FOREIGN KEY (id_scientific_adviser) REFERENCES public.scientific_adviser(id);
+ALTER TABLE public.graduate_work ADD CONSTRAINT graduate_work_id_speciality_fkey FOREIGN KEY (id_speciality) REFERENCES public.speciality(id);
+ALTER TABLE public.graduate_work ADD CONSTRAINT graduate_work_id_student_fkey FOREIGN KEY (id_student) REFERENCES public.students(id);
+
+ALTER TABLE public.drafts ADD CONSTRAINT drafts_id_name_fkey FOREIGN KEY (id_name) REFERENCES public.name_drafts(id);
+ALTER TABLE public.pps ADD CONSTRAINT pps_departament_fkey FOREIGN KEY (departament) REFERENCES public.departament(id);
+ALTER TABLE public.pps ADD CONSTRAINT pps_id_academic_title_fkey FOREIGN KEY (id_academic_title) REFERENCES public.academic_title(id);
+ALTER TABLE public.pps ADD CONSTRAINT pps_id_role_fkey FOREIGN KEY (id_role) REFERENCES public."role"(id);
+
+ALTER TABLE public.students ADD CONSTRAINT students_id_scientific_adviser_fkey FOREIGN KEY (id_scientific_adviser) REFERENCES public.scientific_adviser(id);
+
+ALTER TABLE public.protection_issues ADD CONSTRAINT protection_issues_id_student_fkey FOREIGN KEY (id_student) REFERENCES public.students(id);
+ALTER TABLE public.protection_issues ADD CONSTRAINT protection_issues_id_user_commission_fkey FOREIGN KEY (id_user_commission) REFERENCES public.users_commission(id_user);
+
+ALTER TABLE public.assessments ADD CONSTRAINT assessments_id_student_fkey FOREIGN KEY (id_student) REFERENCES public.students(id);
+ALTER TABLE public.assessments ADD CONSTRAINT assessments_score_graduate_fkey FOREIGN KEY (score_graduate) REFERENCES public.graduate_estimates(id_estimates);
+ALTER TABLE public.assessments ADD CONSTRAINT assessments_score_graduate_work_fkey FOREIGN KEY (score_graduate_work) REFERENCES public.existing_estimates(id);
+
+ALTER TABLE public.adminbd ADD CONSTRAINT adminbd_departament_fkey FOREIGN KEY (departament) REFERENCES public.departament(id);
+ALTER TABLE public.adminbd ADD CONSTRAINT adminbd_id_role_pps_fkey FOREIGN KEY (id_role_pps) REFERENCES public."role"(id);
+
+INSERT INTO public."role"
+(id, "name")
+VALUES(1, 'заведующий кафедрой');
+INSERT INTO public."role"
+(id, "name")
+VALUES(2, 'профессор');
+INSERT INTO public."role"
+(id, "name")
+VALUES(3, 'доцент');
+
+INSERT INTO public.academic_title
+(id, "name")
+VALUES(1, 'доцент');
+INSERT INTO public.academic_title
+(id, "name")
+VALUES(2, 'профессор');
+
+INSERT INTO public.departament
+(id, "name", full_name)
+VALUES(2, 'КИС', 'Корпоративных информационных систем');
+INSERT INTO public.departament
+(id, "name", full_name)
+VALUES(1, 'МОСИТ', 'Математического обеспечения и стандартизации информационных технологий');
+INSERT INTO public.departament
+(id, "name", full_name)
+VALUES(3, 'ВТ', 'Вычислительной техники');
+
+INSERT INTO public.name_drafts
+(id, "name")
+VALUES(1, 'Слушали');
+INSERT INTO public.name_drafts
+(id, "name")
+VALUES(2, 'Постановили');
+INSERT INTO public.name_drafts
+(id, "name")
+VALUES(3, 'Выступили');
+
+INSERT INTO public.graduate_estimates
+(id_estimates, "name")
+VALUES(1, 'с отличием');
+INSERT INTO public.graduate_estimates
+(id_estimates, "name")
+VALUES(2, 'без отличия');
+
+INSERT INTO public.existing_estimates
+(id, "name", "text")
+VALUES(3, 'Удовлетворительно', 'Студент показал достаточный уровень подготовки. Недостаточно глубоко изучил и проанализировал предметную область. При защите ВКР студент проявил неуверенность, показал слабое знание вопросов темы, не дал полного аргументированного ответа на заданные вопросы.');
+INSERT INTO public.existing_estimates
+(id, "name", "text")
+VALUES(1, 'Отлично', 'Студент показал высокий уровень подготовки и глубокие системные знания, свободно оперирует данными исследования, дал развернутые и полные ответы на поставленные вопросы.');
+INSERT INTO public.existing_estimates
+(id, "name", "text")
+VALUES(2, 'Хорошо', 'Студент показал высокий уровень подготовки и глубокие системные знания, но на дополнительные вопросы комиссии были даны неполные ответы.');
+INSERT INTO public.existing_estimates
+(id, "name", "text")
+VALUES(6, 'Неудовлетворительно', NULL);
