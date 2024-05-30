@@ -83,14 +83,18 @@ def create_draft(data, output_docx_path, namepred, userscommission, userbd):
 
             cursor.execute('select ee.name, ee.text, ge.name from assessments a, existing_estimates ee, graduate_estimates ge where a.id_student = %s and a.score_graduate_work = ee.id and a.score_graduate = ge.id_estimates', (item[2],))
             score = cursor.fetchone()
-            context['score'] = score[0]
-            context['scorediplom'] = score[2]
-            lines = score[1].split(',')
-            for i in range(len(lines)):
-                if i < len(lines) - 1:
-                    context['haracteransver' + str(i+1)] = lines[i] + ','
-                else:
-                    context['haracteransver' + str(i+1)] = lines[i]
+            if score is None:
+                context['score'] = ''
+                context['scorediplom'] = ''
+            else:
+                context['score'] = score[0]
+                context['scorediplom'] = score[2]
+                lines = score[1].split(',')
+                for i in range(len(lines)):
+                    if i < len(lines) - 1:
+                        context['haracteransver' + str(i+1)] = lines[i] + ','
+                    else:
+                        context['haracteransver' + str(i+1)] = lines[i]
             
             context['ekzscore'] = "не предусмотрен учебным планом"
             context['nodata'] = "–"
