@@ -96,11 +96,12 @@ class FileServices {
                 return response.data;
             });
     }
-    downloadfile({ userbd, fileID, date, namepred, userscommission }) {
+    downloadfile({ userbd, fileID, date, dateEnd, namepred, userscommission }) {
         return api.post('/downloadfile', {
             userbd,
             fileID,
             date,
+            dateEnd,
             namepred,
             userscommission
         }).then(

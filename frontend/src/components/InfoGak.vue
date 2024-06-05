@@ -643,13 +643,14 @@ export default {
                 userbd: this.adminUser,
                 fileID: this.selectFileDownload.id,
                 date: this.selectedDate,
+                dateEnd: this.currentDateEnd,
                 namepred: this.selectNamePred,
                 userscommission: filteredUsersCommission
             }
             this.$store.dispatch('file/downloadfile', formData).then(
                 response => {
                     if (response.status == 'success') {
-                        location.href = 'http://127.0.0.1:83/downloadfile?id=' + this.selectFileDownload.id;
+                        location.href = 'http://127.0.0.1:5000/downloadfile?id=' + this.selectFileDownload.id;
                     }
                 },
                 (error) => {

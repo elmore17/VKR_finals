@@ -16,7 +16,7 @@ app.config['SECRET_KEY'] = 'your secret key'
 CORS(app)
 
 def get_db_connection():
-    return psycopg2.connect(database="kisprod", user="postgres", password="", host="localhost", port="5432")
+    return psycopg2.connect(database="kisprod", user="postgres", password="elmore", host="localhost", port="5432")
 
 
 @app.route('/refreshToken', methods=['POST'])
@@ -526,6 +526,7 @@ def download_file():
         userbd = post_data.get('userbd')
         file_id = post_data.get('fileID')
         date = post_data.get('date')
+        dateEnd = post_data.get('dateEnd')
         namepred = post_data.get('namepred')
         userscommission = post_data.get('userscommission')
         if date == '':
@@ -533,11 +534,11 @@ def download_file():
             date = today.strftime('%Y-%m-%d')
         with get_db_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("UPDATE graduate_work SET date_start = %s WHERE id_filepath = %s", (date, file_id))
+            cursor.execute("UPDATE graduate_work SET date_start = %s, date_end = %s WHERE id_filepath = %s", (date, dateEnd, file_id))
             conn.commit()
-            cursor.execute("select gw.date_start ,d.name_direction, s.id, s.name, s.title_gradual_work, sa.name_adviser, sa.role, le.name_level_education, s2.name_speciality  from graduate_work gw, direction d, students s, scientific_adviser sa, level_education le, speciality s2 where gw.id_filepath = %s and gw.id_student = s.id and gw.id_scientific_adviser = sa.id and le.id = gw.id_level_education and s2.id = gw.id_speciality", (file_id,))
+            cursor.execute("select gw.date_start ,d.name_direction, s.id, s.name, s.title_gradual_work, sa.name_adviser, sa.role, le.name_level_education, s2.name_speciality, gw.date_end from graduate_work gw, direction d, students s, scientific_adviser sa, level_education le, speciality s2 where gw.id_filepath = %s and gw.id_student = s.id and gw.id_scientific_adviser = sa.id and le.id = gw.id_level_education and s2.id = gw.id_speciality", (file_id,))
             info = cursor.fetchall()
-        output_path = f'Готовый_протокол_{file_id}.docx'
+        output_path = f'C:/Users/Acer/Desktop/VKR_finals/docx/Готовый_протокол_{file_id}.docx'
         create_draft(info, output_path, namepred, userscommission, userbd)
         return make_response(jsonify({'status':'success'}))
     if request.method == 'GET':
@@ -545,7 +546,7 @@ def download_file():
         output_path = f'Готовый_протокол_{file_id}.docx'
         if output_path:
             return send_file(
-                f'/Users/danilegorkin/Documents/VKR/{output_path}', as_attachment=True
+                f'C:/Users/Acer/Desktop/VKR_finals/docx/{output_path}', as_attachment=True
             )
         else:
             return make_response(jsonify({'error': 'output_path is missing'}), 400)
@@ -847,7 +848,7 @@ def download_file_ZK():
         output_path = f'Готовый_протокол_заседания_кафедры_{file_id}.docx'
         if output_path:
             return send_file(
-                f'/Users/danilegorkin/Documents/VKR/{output_path}', as_attachment=True
+                f'C:/Users/Acer/Desktop/VKR_finals/docx/{output_path}', as_attachment=True
             )
         else:
             return make_response(jsonify({'error': 'output_path is missing'}), 400)

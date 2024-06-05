@@ -6,10 +6,10 @@ from datetime import datetime
 import psycopg2
 
 # Устанавливаем русскую локаль
-locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
+locale.setlocale(locale.LC_TIME, 'Russian_Russia.1251')
 
 def get_db_connection():
-    return psycopg2.connect(database="kisprod", user="postgres", password="", host="localhost", port="5432")
+    return psycopg2.connect(database="kisprod", user="postgres", password="elmore", host="localhost", port="5432")
 
 def read_docx(docx_path, items_per_subarray=142):
     doc = Document(docx_path)
@@ -28,7 +28,7 @@ def read_docx(docx_path, items_per_subarray=142):
 
 # Вставка данных в шаблон
 def create_draft(data, output_docx_path, namepred, userscommission, userbd):
-    doc = DocxTemplate('shablon.docx')
+    doc = DocxTemplate('C:/Users/Acer/Desktop/VKR_finals/shablon.docx')
     
     combined_doc = Document()
     
@@ -37,6 +37,10 @@ def create_draft(data, output_docx_path, namepred, userscommission, userbd):
         day_name = date_obj.strftime('%d')
         month_name = date_obj.strftime('%B')
         year_name = date_obj.strftime('%Y')
+        date_obj_end = datetime.combine(item[9], datetime.min.time())
+        day_name_end = date_obj_end.strftime('%d')
+        month_name_end = date_obj_end.strftime('%B')
+        year_name_end = date_obj_end.strftime('%Y')
         context = {
             'day': day_name,
             'mouth': month_name,
@@ -49,7 +53,10 @@ def create_draft(data, output_docx_path, namepred, userscommission, userbd):
             'rang': item[6],
             'student': item[3],
             'kval': item[7],
-            'spec': item[8]
+            'spec': item[8],
+            'dayend': day_name_end,
+            'mouthend': month_name_end,
+            'yearend': year_name_end
         }
 
         for i, usercommission in enumerate(userscommission, start=1):
@@ -122,7 +129,7 @@ def create_draft(data, output_docx_path, namepred, userscommission, userbd):
 
 #Вствка данных в шаблон заседание кафедры
 def create_draft_ZK(data, pred, json, adminuser, pps, checkedItems, output_path):
-    docx = DocxTemplate('shablonZK.docx')
+    docx = DocxTemplate('C:/Users/Acer/Desktop/VKR_finals/shablonZK.docx')
     context = {}
     date_obj = datetime.strptime(data, '%Y-%m-%d').date()
     date_time_obj = datetime.combine(date_obj, datetime.min.time())

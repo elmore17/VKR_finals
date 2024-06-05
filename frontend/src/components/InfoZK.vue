@@ -579,7 +579,7 @@ export default {
             this.$store.dispatch('file/downloadfileZK', formData).then(
                 response => {
                     if (response.status == 'success') {
-                        location.href = 'http://127.0.0.1:83/downloadfileZK?id=' + this.downloadFileId;
+                        location.href = 'http://127.0.0.1:5000/downloadfileZK?id=' + this.downloadFileId;
                     }
                 }
             );
